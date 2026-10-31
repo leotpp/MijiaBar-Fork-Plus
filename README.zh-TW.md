@@ -55,7 +55,7 @@
 
 ## 安裝
 
-1. 從 [Releases](https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest) 下載 `MijiaBar-x.y.z.dmg`，把 MijiaBar 拖進「應用程式」後開啟。本倉庫發佈的安裝檔為 ad-hoc 簽署，未經 Apple 公證。
+1. 從 [Releases](https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest) 下載 `MijiaBar-*-unsigned.dmg`，把 MijiaBar 拖進「應用程式」後開啟。本倉庫發佈的安裝檔為 ad-hoc 簽署，未經 Apple 公證。
 2. 首次開啟：在「應用程式」中右鍵 MijiaBar →「打開」→ 再點「打開」（或執行 `xattr -dr com.apple.quarantine /Applications/MijiaBar.app`）。
 3. 第一次控制裝置時，請允許「本機網路」權限（區域網路直連需要）。
 

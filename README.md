@@ -55,7 +55,7 @@
 
 ## Install
 
-1. Download `MijiaBar-x.y.z.dmg` from [Releases](https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest), drag MijiaBar into Applications and open it. Builds published here are ad-hoc signed, not notarized by Apple.
+1. Download `MijiaBar-*-unsigned.dmg` from [Releases](https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest), drag MijiaBar into Applications and open it. Builds published here are ad-hoc signed, not notarized by Apple.
 2. First launch: right-click MijiaBar in Applications → **Open** → **Open** (or run `xattr -dr com.apple.quarantine /Applications/MijiaBar.app`).
 3. The first time you control a device, allow the **Local Network** permission (needed for LAN control).
 
