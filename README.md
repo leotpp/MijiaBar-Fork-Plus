@@ -2,12 +2,11 @@
 <p align="center">Control your Xiaomi Mi Home devices from the macOS menu bar — and let AI agents do it too.</p>
 
 <p align="center">
-  <a href="https://github.com/neardws/MijiaBar/releases/latest"><img src="https://img.shields.io/github/v/release/neardws/MijiaBar?label=release&color=blue" alt="Release"></a>
-  <a href="https://github.com/neardws/MijiaBar/releases"><img src="https://img.shields.io/github/downloads/neardws/MijiaBar/total?color=brightgreen" alt="Downloads"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/neardws/MijiaBar" alt="License"></a>
+  <a href="https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest"><img src="https://img.shields.io/github/v/release/leotpp/MijiaBar-Fork-Plus?label=release&color=blue" alt="Release"></a>
+  <a href="https://github.com/leotpp/MijiaBar-Fork-Plus/releases"><img src="https://img.shields.io/github/downloads/leotpp/MijiaBar-Fork-Plus/total?color=brightgreen" alt="Downloads"></a>
+  <a href="https://github.com/leotpp/MijiaBar-Fork-Plus/blob/main/LICENSE"><img src="https://img.shields.io/github/license/leotpp/MijiaBar-Fork-Plus" alt="License"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-000000?logo=apple" alt="macOS 14+">
   <img src="https://img.shields.io/badge/Swift-5.9%2B-F05138?logo=swift&logoColor=white" alt="Swift 5.9+">
-  <img src="https://img.shields.io/badge/Apple-notarized-success?logo=apple" alt="Notarized">
   <a href="https://github.com/neardws/MijiaBar/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/neardws/MijiaBar/build.yml?branch=main&label=build" alt="Build"></a>
   <a href="https://github.com/neardws/MijiaBar/stargazers"><img src="https://img.shields.io/github/stars/neardws/MijiaBar?style=social" alt="Stars"></a>
 </p>
@@ -16,11 +15,11 @@
 
 > Unofficial project, not affiliated with Xiaomi. It uses the same cloud API as the Mi Home app plus the LAN miIO protocol.
 
-> **Fork note.** This repository is a fork of [neardws/MijiaBar](https://github.com/neardws/MijiaBar), renamed **MijiaBar-Fork-Plus** and maintained by [@leotpp](https://github.com/leotpp). The upstream MIT license and copyright notice are kept unchanged in [LICENSE](LICENSE). This fork adds vertical swing and tilt-angle controls to the fan detail page (verified on a dmaker.fan.p28); the official builds in the upstream [Releases](https://github.com/neardws/MijiaBar/releases) do not include these changes.
+> **Fork note.** This repository is a fork of [neardws/MijiaBar](https://github.com/neardws/MijiaBar), renamed **MijiaBar-Fork-Plus** and maintained by [@leotpp](https://github.com/leotpp). The upstream MIT license and copyright notice are kept unchanged in [LICENSE](LICENSE).
 
 <p align="center"><img src="https://files.neardws.com/mijiabar/readme/demo.gif" width="300" alt="demo"></p>
 
-[Features](#features) · [Screenshots](#screenshots) · [Install](#install) · [Sign in](#sign-in) · [Auto-hidden devices](#auto-hidden-devices) · [Live video (cameras)](#live-video-cameras) · [Agent / MCP](#agent--mcp) · [Build from source](#build-from-source) · [Where data is stored](#where-data-is-stored) · [Credits](#credits)
+[Features](#features) · [Screenshots](#screenshots) · [Install](#install) · [Update notes](#update-notes) · [Sign in](#sign-in) · [Auto-hidden devices](#auto-hidden-devices) · [Live video (cameras)](#live-video-cameras) · [Agent / MCP](#agent--mcp) · [Build from source](#build-from-source) · [Where data is stored](#where-data-is-stored) · [Credits](#credits)
 
 ## Features
 
@@ -56,12 +55,16 @@
 
 ## Install
 
-1. Download `MijiaBar-x.y.z.dmg` from [Releases](https://github.com/neardws/MijiaBar/releases/latest), drag MijiaBar into Applications and open it. Release DMGs are Developer ID signed and notarized by Apple.
-2. The first time you control a device, allow the **Local Network** permission (needed for LAN control).
-
-> CI `*-unsigned.dmg` builds and your own local builds are ad-hoc signed; run `xattr -dr com.apple.quarantine /Applications/MijiaBar.app` before first launch.
+1. Download `MijiaBar-x.y.z.dmg` from [Releases](https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest), drag MijiaBar into Applications and open it. Builds published here are ad-hoc signed, not notarized by Apple.
+2. First launch: right-click MijiaBar in Applications → **Open** → **Open** (or run `xattr -dr com.apple.quarantine /Applications/MijiaBar.app`).
+3. The first time you control a device, allow the **Local Network** permission (needed for LAN control).
 
 Requires macOS 14 or later, Apple silicon or Intel.
+
+## Update notes
+
+- **0.1.16** (2026-10-31) — Fan detail page: vertical swing and tilt-angle controls, verified on a dmaker.fan.p28. First release published from this fork.
+- Earlier versions are inherited from upstream [neardws/MijiaBar](https://github.com/neardws/MijiaBar).
 
 ## Sign in
 

@@ -6,20 +6,20 @@ import re
 files={'en':'README.md','zh-Hans':'README.zh-CN.md','zh-Hant':'README.zh-TW.md'}
 names={'en':'English','zh-Hans':'简体中文','zh-Hant':'繁體中文'}
 R='neardws/MijiaBar'
+F='leotpp/MijiaBar-Fork-Plus'
 badges=f'''<p align="center">
-  <a href="https://github.com/{R}/releases/latest"><img src="https://img.shields.io/github/v/release/{R}?label=release&color=blue" alt="Release"></a>
-  <a href="https://github.com/{R}/releases"><img src="https://img.shields.io/github/downloads/{R}/total?color=brightgreen" alt="Downloads"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/{R}" alt="License"></a>
+  <a href="https://github.com/{F}/releases/latest"><img src="https://img.shields.io/github/v/release/{F}?label=release&color=blue" alt="Release"></a>
+  <a href="https://github.com/{F}/releases"><img src="https://img.shields.io/github/downloads/{F}/total?color=brightgreen" alt="Downloads"></a>
+  <a href="https://github.com/{F}/blob/main/LICENSE"><img src="https://img.shields.io/github/license/{F}" alt="License"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-000000?logo=apple" alt="macOS 14+">
   <img src="https://img.shields.io/badge/Swift-5.9%2B-F05138?logo=swift&logoColor=white" alt="Swift 5.9+">
-  <img src="https://img.shields.io/badge/Apple-notarized-success?logo=apple" alt="Notarized">
   <a href="https://github.com/{R}/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/{R}/build.yml?branch=main&label=build" alt="Build"></a>
   <a href="https://github.com/{R}/stargazers"><img src="https://img.shields.io/github/stars/{R}?style=social" alt="Stars"></a>
 </p>'''
 T={}
 T['en']=dict(tag="Control your Xiaomi Mi Home devices from the macOS menu bar — and let AI agents do it too.",
 note="Unofficial project, not affiliated with Xiaomi. It uses the same cloud API as the Mi Home app plus the LAN miIO protocol.",
-fork="**Fork note.** This repository is a fork of [neardws/MijiaBar](https://github.com/neardws/MijiaBar), renamed **MijiaBar-Fork-Plus** and maintained by [@leotpp](https://github.com/leotpp). The upstream MIT license and copyright notice are kept unchanged in [LICENSE](LICENSE). This fork adds vertical swing and tilt-angle controls to the fan detail page (verified on a dmaker.fan.p28); the official builds in the upstream [Releases](https://github.com/neardws/MijiaBar/releases) do not include these changes.",
+fork="**Fork note.** This repository is a fork of [neardws/MijiaBar](https://github.com/neardws/MijiaBar), renamed **MijiaBar-Fork-Plus** and maintained by [@leotpp](https://github.com/leotpp). The upstream MIT license and copyright notice are kept unchanged in [LICENSE](LICENSE).",
 toc=["Features","Screenshots","Install","Sign in","Agent / MCP","Build from source","Credits"],
 dark="Dark mode",
 feat=["**QR sign-in** — scan with the Mi Home app, no password. Mainland China server by default; Europe, US, Russia, Singapore and India are one click away. Credentials stay in the macOS Keychain.",
@@ -33,9 +33,11 @@ feat=["**QR sign-in** — scan with the Mi Home app, no password. Mainland China
 "**3 UI languages** — English, 简体中文, 繁體中文 (Taiwan wording); region-aware defaults.",
 "**Agent interface** — `mijiabar` CLI and a stdio MCP server, read-only by default, with allowlist / full access and optional confirmation dialogs.",
 "**Two control paths** — Xiaomi cloud MIoT RPC with LAN miIO fallback; AC partners (`lumi.acpartner.*`) use legacy LAN commands."],
-inst=["Download `MijiaBar-x.y.z.dmg` from [Releases](https://github.com/neardws/MijiaBar/releases/latest), drag MijiaBar into Applications and open it. Release DMGs are Developer ID signed and notarized by Apple.",
+inst=["Download `MijiaBar-x.y.z.dmg` from [Releases](https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest), drag MijiaBar into Applications and open it. Builds published here are ad-hoc signed, not notarized by Apple.",
+"First launch: right-click MijiaBar in Applications → **Open** → **Open** (or run `xattr -dr com.apple.quarantine /Applications/MijiaBar.app`).",
 "The first time you control a device, allow the **Local Network** permission (needed for LAN control)."],
-inst_note="CI `*-unsigned.dmg` builds and your own local builds are ad-hoc signed; run `xattr -dr com.apple.quarantine /Applications/MijiaBar.app` before first launch.",
+updates=("Update notes",["**0.1.16** (2026-10-31) — Fan detail page: vertical swing and tilt-angle controls, verified on a dmaker.fan.p28. First release published from this fork.",
+"Earlier versions are inherited from upstream [neardws/MijiaBar](https://github.com/neardws/MijiaBar)."]),
 req="Requires macOS 14 or later, Apple silicon or Intel.",
 login=["Click the 🏠 icon in the menu bar; a QR code appears.","Pick your server region (Mainland China by default).","In the **Mi Home** app tap **+ → Scan**, scan the code and confirm on the phone. Devices load automatically."],
 agent_intro="Open **Settings → Agent interface**, click **Copy setup instructions** and paste the text into Claude Code, Codex, Cursor or any other agent. The agent finds the bundled CLI, registers the MCP server in its own config and verifies by listing your devices. The same text (with the path filled in) is printed by `mijiabar setup-prompt`:",
@@ -47,7 +49,7 @@ credits="Motion design contributed by [@skyswordw](https://github.com/skyswordw)
 lic="MIT License.")
 T['zh-Hans']=dict(tag="在 macOS 菜单栏控制米家设备，也可以交给 AI Agent 来控制。",
 note="非小米官方项目。使用与米家 App 相同的云端接口和局域网 miIO 协议。",
-fork="**Fork 说明**：本仓库是 [neardws/MijiaBar](https://github.com/neardws/MijiaBar) 的 fork，仓库名 **MijiaBar-Fork-Plus**，由 [@leotpp](https://github.com/leotpp) 维护；上游的 MIT 许可证与版权声明原样保留在 [LICENSE](LICENSE)。本 fork 新增风扇详情页的「上下摆头」「上下摆角」（dmaker.fan.p28 真机验证）；上游 [Releases](https://github.com/neardws/MijiaBar/releases) 的官方安装包不含这些改动。",
+fork="**Fork 说明**：本仓库是 [neardws/MijiaBar](https://github.com/neardws/MijiaBar) 的 fork，仓库名 **MijiaBar-Fork-Plus**，由 [@leotpp](https://github.com/leotpp) 维护；上游的 MIT 许可证与版权声明原样保留在 [LICENSE](LICENSE)。",
 toc=["功能","截图","安装","登录","Agent / MCP","从源码构建","致谢"],dark="深色模式",
 feat=["**扫码登录**：用米家 App 扫一扫，无需密码。默认中国大陆服务器，也可切换欧洲、美国、俄罗斯、新加坡、印度。凭据只存在 macOS 钥匙串。",
 "**自动获取设备**：拉取所有家庭、房间和共享设备及在线状态；离线和久未使用的设备默认隐藏。",
@@ -60,8 +62,11 @@ feat=["**扫码登录**：用米家 App 扫一扫，无需密码。默认中国�
 "**支持三种界面语言**：简体中文、繁體中文（台湾用语）、English，按地区推荐默认语言。",
 "**Agent 接口**：`mijiabar` 命令行和 stdio MCP 服务器，默认只读，可选白名单 / 全部权限，写操作可弹窗确认。",
 "**双通道控制**：小米云 MIoT RPC，失败时回落局域网 miIO；空调伴侣（`lumi.acpartner.*`）使用旧版局域网命令。"],
-inst=["从 [Releases](https://github.com/neardws/MijiaBar/releases/latest) 下载 `MijiaBar-x.y.z.dmg`，把 MijiaBar 拖进「应用程序」后打开。正式版已用 Developer ID 签名并通过 Apple 公证。","第一次控制设备时，请允许「本地网络」权限（局域网直连需要）。"],
-inst_note="CI 构建的 `*-unsigned.dmg` 和自己本地打包的版本为 ad-hoc 签名，首次打开前执行 `xattr -dr com.apple.quarantine /Applications/MijiaBar.app`。",
+inst=["从 [Releases](https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest) 下载 `MijiaBar-x.y.z.dmg`，把 MijiaBar 拖进「应用程序」后打开。本仓库发布的安装包为 ad-hoc 签名，未经 Apple 公证。",
+"首次打开：在「应用程序」里右键 MijiaBar →「打开」→ 再点「打开」（或执行 `xattr -dr com.apple.quarantine /Applications/MijiaBar.app`）。",
+"第一次控制设备时，请允许「本地网络」权限（局域网直连需要）。"],
+updates=("更新记录",["**0.1.16**（2026-10-31）：风扇详情页新增「上下摆头」「上下摆角」，已在 dmaker.fan.p28 真机验证；本 fork 的首个发布版本。",
+"更早的版本来自上游 [neardws/MijiaBar](https://github.com/neardws/MijiaBar)。"]),
 req="系统要求：macOS 14 及以上，支持 Apple 芯片和 Intel。",
 login=["点菜单栏的 🏠 图标，会显示二维码。","选择服务器地区（默认中国大陆）。","打开手机 **米家 App** →「+」→「扫一扫」，扫码并在手机上确认，设备会自动加载。"],
 agent_intro="打开 **设置 → Agent 接口**，点 **复制安装说明**，粘贴给 Claude Code、Codex、Cursor 等 Agent。Agent 会自己找到内置 CLI、在自己的配置里注册 MCP 服务器，并列出设备完成验证。`mijiabar setup-prompt` 会输出同样的内容（路径已填好）：",
@@ -73,7 +78,7 @@ credits="动效设计由 [@skyswordw](https://github.com/skyswordw) 贡献（[#1
 lic="MIT 许可证。")
 T['zh-Hant']=dict(tag="在 macOS 選單列控制米家裝置，也可以交給 AI Agent 來控制。",
 note="非小米官方專案。使用與米家 App 相同的雲端介面和區域網路 miIO 協定。",
-fork="**Fork 說明**：本倉庫是 [neardws/MijiaBar](https://github.com/neardws/MijiaBar) 的 fork，倉庫名 **MijiaBar-Fork-Plus**，由 [@leotpp](https://github.com/leotpp) 維護；上游的 MIT 授權與版權聲明原樣保留在 [LICENSE](LICENSE)。本 fork 新增風扇詳細頁的「上下擺頭」「上下擺角」（dmaker.fan.p28 實機驗證）；上游 [Releases](https://github.com/neardws/MijiaBar/releases) 的官方安裝檔不含這些改動。",
+fork="**Fork 說明**：本倉庫是 [neardws/MijiaBar](https://github.com/neardws/MijiaBar) 的 fork，倉庫名 **MijiaBar-Fork-Plus**，由 [@leotpp](https://github.com/leotpp) 維護；上游的 MIT 授權與版權聲明原樣保留在 [LICENSE](LICENSE)。",
 toc=["功能","截圖","安裝","登入","Agent / MCP","從原始碼建置","致謝"],dark="深色模式",
 feat=["**掃碼登入**：用米家 App 掃一掃，免密碼。預設中國大陸伺服器，也可切換歐洲、美國、俄羅斯、新加坡、印度。憑證只存在 macOS 鑰匙圈。",
 "**自動取得裝置**：載入所有家庭、房間和共享裝置及上線狀態；離線和久未使用的裝置預設隱藏。",
@@ -86,8 +91,11 @@ feat=["**掃碼登入**：用米家 App 掃一掃，免密碼。預設中國大�
 "**支援三種介面語言**：繁體中文（台灣用語）、简体中文、English，依地區建議預設語言。",
 "**Agent 介面**：`mijiabar` 命令列和 stdio MCP 伺服器，預設唯讀，可選白名單 / 全部權限，寫入操作可跳出視窗確認。",
 "**雙通道控制**：小米雲端 MIoT RPC，失敗時退回區域網路 miIO；空調夥伴（`lumi.acpartner.*`）使用舊版區域網路指令。"],
-inst=["從 [Releases](https://github.com/neardws/MijiaBar/releases/latest) 下載 `MijiaBar-x.y.z.dmg`，把 MijiaBar 拖進「應用程式」後開啟。正式版已用 Developer ID 簽署並通過 Apple 公證。","第一次控制裝置時，請允許「本機網路」權限（區域網路直連需要）。"],
-inst_note="CI 建置的 `*-unsigned.dmg` 和自行本機打包的版本為 ad-hoc 簽署，首次開啟前執行 `xattr -dr com.apple.quarantine /Applications/MijiaBar.app`。",
+inst=["從 [Releases](https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest) 下載 `MijiaBar-x.y.z.dmg`，把 MijiaBar 拖進「應用程式」後開啟。本倉庫發佈的安裝檔為 ad-hoc 簽署，未經 Apple 公證。",
+"首次開啟：在「應用程式」中右鍵 MijiaBar →「打開」→ 再點「打開」（或執行 `xattr -dr com.apple.quarantine /Applications/MijiaBar.app`）。",
+"第一次控制裝置時，請允許「本機網路」權限（區域網路直連需要）。"],
+updates=("更新紀錄",["**0.1.16**（2026-10-31）：風扇詳細頁新增「上下擺頭」「上下擺角」，已在 dmaker.fan.p28 實機驗證；本 fork 的首個發佈版本。",
+"更早的版本來自上游 [neardws/MijiaBar](https://github.com/neardws/MijiaBar)。"]),
 req="系統需求：macOS 14 以上，支援 Apple 晶片和 Intel。",
 login=["點選單列的 🏠 圖示，會顯示 QR 碼。","選擇伺服器地區（預設為中國大陸）。","開啟手機 **米家 App** →「+」→「掃一掃」，掃描 QR 碼並在手機上確認，裝置會自動載入。"],
 agent_intro="開啟 **設定 → Agent 介面**，點 **複製安裝說明**，貼給 Claude Code、Codex、Cursor 等 Agent。Agent 會自己找到內建 CLI、在自己的設定裡註冊 MCP 伺服器，並列出裝置完成驗證。`mijiabar setup-prompt` 會輸出同樣的內容（路徑已填好）：",
@@ -135,7 +143,8 @@ for lang,fn in files.items():
     sw=' · '.join(f'<b>{names[l]}</b>' if l==lang else f'<a href="{f}">{names[l]}</a>' for l,f in files.items())
     hh,hl,dh,dl=X[lang]
     lvh,lvl=LV[lang]
-    toc=t['toc'][:4]+[hh,lvh]+t['toc'][4:6]+[dh]+t['toc'][6:]
+    uh,ul=t['updates']
+    toc=t['toc'][:3]+[uh]+t['toc'][3:4]+[hh,lvh]+t['toc'][4:6]+[dh]+t['toc'][6:]
     if '--reuse-prompts' in sys.argv:
         prompt=re.search(r'```text\n(.*?)\n```',open(fn).read(),re.S).group(1)
     else:
@@ -151,15 +160,16 @@ for lang,fn in files.items():
        '<p align="center">\n  <img src="https://files.neardws.com/mijiabar/readme/list-light.webp" width="260" alt="">\n  <img src="https://files.neardws.com/mijiabar/readme/ac-cool-light.webp" width="260" alt="">\n  <img src="https://files.neardws.com/mijiabar/readme/fan-light.webp" width="260" alt="">\n</p>',
        f'<p align="center"><b>{t["dark"]}</b><br>\n  <img src="https://files.neardws.com/mijiabar/readme/list-dark.webp" width="260" alt="">\n  <img src="https://files.neardws.com/mijiabar/readme/ac-heat-dark.webp" width="260" alt="">\n  <img src="https://files.neardws.com/mijiabar/readme/light-dark.webp" width="260" alt="">\n</p>',
        '<p align="center">\n  <img src="https://files.neardws.com/mijiabar/readme/plug-light.webp" width="260" alt="">\n  <img src="https://files.neardws.com/mijiabar/readme/agent-light.webp" width="260" alt="">\n  <img src="https://files.neardws.com/mijiabar/readme/login-light.webp" width="260" alt="">\n</p>','',
-       f'## {toc[2]}','']+[f'{i+1}. {x}' for i,x in enumerate(t['inst'])]+['',f'> {t["inst_note"]}','',t['req'],'',
-       f'## {toc[3]}','']+[f'{i+1}. {x}' for i,x in enumerate(t['login'])]+['',
+       f'## {toc[2]}','']+[f'{i+1}. {x}' for i,x in enumerate(t['inst'])]+['',t['req'],'',
+       f'## {toc[3]}','']+[f'- {x}' for x in ul]+['',
+       f'## {toc[4]}','']+[f'{i+1}. {x}' for i,x in enumerate(t['login'])]+['',
        f'## {hh}','',hl[0],'']+[f'- {x}' for x in hl[1:3]]+['',hl[3],'',
        f'## {lvh}','']+[f'- {x}' for x in lvl]+['','<p align="center">\n  <img src="https://files.neardws.com/mijiabar/readme/camera-live-light.webp" width="260" alt="">\n  <img src="https://files.neardws.com/mijiabar/readme/doorbell-live-dark.webp" width="260" alt="">\n</p>','',
-       f'## {toc[6]}','',t['agent_intro'],'','```text',prompt,'```','',f'{DOCL[lang][0]} [docs/AGENT_SETUP{DOCL[lang][1]}.md](docs/AGENT_SETUP{DOCL[lang][1]}.md)','',
+       f'## {toc[7]}','',t['agent_intro'],'','```text',prompt,'```','',f'{DOCL[lang][0]} [docs/AGENT_SETUP{DOCL[lang][1]}.md](docs/AGENT_SETUP{DOCL[lang][1]}.md)','',
        f'### {t["perm_h"]}','','| | |','| --- | --- |']+[f'| {a} | {b} |' for a,b in t['perm']]+['',t['confirm'],'',
        f'### {t["cli_h"]}','',cli,'',t['tools'],'',
-       f'## {toc[7]}','',build,'',t['build_note'],'',
+       f'## {toc[8]}','',build,'',t['build_note'],'',
        f'## {dh}','']+[f'- {x}' for x in dl]+['',
-       f'## {toc[9]}','',t['credits'],'',t['lic'],'']
+       f'## {toc[10]}','',t['credits'],'',t['lic'],'']
     open(fn,'w').write('\n'.join(x for x in o if x is not None).lstrip('\n'))
 print('ok')

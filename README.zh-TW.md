@@ -2,12 +2,11 @@
 <p align="center">在 macOS 選單列控制米家裝置，也可以交給 AI Agent 來控制。</p>
 
 <p align="center">
-  <a href="https://github.com/neardws/MijiaBar/releases/latest"><img src="https://img.shields.io/github/v/release/neardws/MijiaBar?label=release&color=blue" alt="Release"></a>
-  <a href="https://github.com/neardws/MijiaBar/releases"><img src="https://img.shields.io/github/downloads/neardws/MijiaBar/total?color=brightgreen" alt="Downloads"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/neardws/MijiaBar" alt="License"></a>
+  <a href="https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest"><img src="https://img.shields.io/github/v/release/leotpp/MijiaBar-Fork-Plus?label=release&color=blue" alt="Release"></a>
+  <a href="https://github.com/leotpp/MijiaBar-Fork-Plus/releases"><img src="https://img.shields.io/github/downloads/leotpp/MijiaBar-Fork-Plus/total?color=brightgreen" alt="Downloads"></a>
+  <a href="https://github.com/leotpp/MijiaBar-Fork-Plus/blob/main/LICENSE"><img src="https://img.shields.io/github/license/leotpp/MijiaBar-Fork-Plus" alt="License"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-000000?logo=apple" alt="macOS 14+">
   <img src="https://img.shields.io/badge/Swift-5.9%2B-F05138?logo=swift&logoColor=white" alt="Swift 5.9+">
-  <img src="https://img.shields.io/badge/Apple-notarized-success?logo=apple" alt="Notarized">
   <a href="https://github.com/neardws/MijiaBar/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/neardws/MijiaBar/build.yml?branch=main&label=build" alt="Build"></a>
   <a href="https://github.com/neardws/MijiaBar/stargazers"><img src="https://img.shields.io/github/stars/neardws/MijiaBar?style=social" alt="Stars"></a>
 </p>
@@ -16,11 +15,11 @@
 
 > 非小米官方專案。使用與米家 App 相同的雲端介面和區域網路 miIO 協定。
 
-> **Fork 說明**：本倉庫是 [neardws/MijiaBar](https://github.com/neardws/MijiaBar) 的 fork，倉庫名 **MijiaBar-Fork-Plus**，由 [@leotpp](https://github.com/leotpp) 維護；上游的 MIT 授權與版權聲明原樣保留在 [LICENSE](LICENSE)。本 fork 新增風扇詳細頁的「上下擺頭」「上下擺角」（dmaker.fan.p28 實機驗證）；上游 [Releases](https://github.com/neardws/MijiaBar/releases) 的官方安裝檔不含這些改動。
+> **Fork 說明**：本倉庫是 [neardws/MijiaBar](https://github.com/neardws/MijiaBar) 的 fork，倉庫名 **MijiaBar-Fork-Plus**，由 [@leotpp](https://github.com/leotpp) 維護；上游的 MIT 授權與版權聲明原樣保留在 [LICENSE](LICENSE)。
 
 <p align="center"><img src="https://files.neardws.com/mijiabar/readme/demo.gif" width="300" alt="demo"></p>
 
-[功能](#功能) · [截圖](#截圖) · [安裝](#安裝) · [登入](#登入) · [預設隱藏規則](#預設隱藏規則) · [攝影機直播](#攝影機直播) · [Agent / MCP](#agent--mcp) · [從原始碼建置](#從原始碼建置) · [資料存放位置](#資料存放位置) · [致謝](#致謝)
+[功能](#功能) · [截圖](#截圖) · [安裝](#安裝) · [更新紀錄](#更新紀錄) · [登入](#登入) · [預設隱藏規則](#預設隱藏規則) · [攝影機直播](#攝影機直播) · [Agent / MCP](#agent--mcp) · [從原始碼建置](#從原始碼建置) · [資料存放位置](#資料存放位置) · [致謝](#致謝)
 
 ## 功能
 
@@ -56,12 +55,16 @@
 
 ## 安裝
 
-1. 從 [Releases](https://github.com/neardws/MijiaBar/releases/latest) 下載 `MijiaBar-x.y.z.dmg`，把 MijiaBar 拖進「應用程式」後開啟。正式版已用 Developer ID 簽署並通過 Apple 公證。
-2. 第一次控制裝置時，請允許「本機網路」權限（區域網路直連需要）。
-
-> CI 建置的 `*-unsigned.dmg` 和自行本機打包的版本為 ad-hoc 簽署，首次開啟前執行 `xattr -dr com.apple.quarantine /Applications/MijiaBar.app`。
+1. 從 [Releases](https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest) 下載 `MijiaBar-x.y.z.dmg`，把 MijiaBar 拖進「應用程式」後開啟。本倉庫發佈的安裝檔為 ad-hoc 簽署，未經 Apple 公證。
+2. 首次開啟：在「應用程式」中右鍵 MijiaBar →「打開」→ 再點「打開」（或執行 `xattr -dr com.apple.quarantine /Applications/MijiaBar.app`）。
+3. 第一次控制裝置時，請允許「本機網路」權限（區域網路直連需要）。
 
 系統需求：macOS 14 以上，支援 Apple 晶片和 Intel。
+
+## 更新紀錄
+
+- **0.1.16**（2026-10-31）：風扇詳細頁新增「上下擺頭」「上下擺角」，已在 dmaker.fan.p28 實機驗證；本 fork 的首個發佈版本。
+- 更早的版本來自上游 [neardws/MijiaBar](https://github.com/neardws/MijiaBar)。
 
 ## 登入
 
