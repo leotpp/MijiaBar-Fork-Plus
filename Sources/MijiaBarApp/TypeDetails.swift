@@ -125,7 +125,11 @@ struct FanDetail: View {
             HStack(spacing: 8) {
                 PropTile(dc: dc, prop: dc.p("mode", in: "fan"), title: L("模式", "Mode"), icon: "wind", tint: tint)
                 PropTile(dc: dc, prop: swing, title: L("摆头", "Oscillate"), icon: "arrow.left.and.right", tint: tint)
+                PropTile(dc: dc, prop: dc.p("vertical-swing"), title: L("上下摆头", "Tilt"), icon: "arrow.up.and.down", tint: tint)
+            }
+            HStack(spacing: 8) {
                 PropTile(dc: dc, prop: dc.p("horizontal-swing-included-angle") ?? dc.p("horizontal-angle"), title: L("摆头角度", "Angle"), icon: "angle", tint: tint)
+                PropTile(dc: dc, prop: dc.p("vertical-swing-included-angle"), title: L("上下摆角", "Tilt angle"), icon: "angle", tint: tint)
                 PropTile(dc: dc, prop: dc.p("physical-controls-locked"), title: L("童锁", "Child lock"), icon: "lock", tint: tint)
             }
         }
