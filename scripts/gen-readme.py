@@ -19,6 +19,7 @@ badges=f'''<p align="center">
 T={}
 T['en']=dict(tag="Control your Xiaomi Mi Home devices from the macOS menu bar — and let AI agents do it too.",
 note="Unofficial project, not affiliated with Xiaomi. It uses the same cloud API as the Mi Home app plus the LAN miIO protocol.",
+fork="**Fork note.** This repository is a fork of [neardws/MijiaBar](https://github.com/neardws/MijiaBar), renamed **MijiaBar-Fork-Plus** and maintained by [@leotpp](https://github.com/leotpp). The upstream MIT license and copyright notice are kept unchanged in [LICENSE](LICENSE). This fork adds vertical swing and tilt-angle controls to the fan detail page (verified on a dmaker.fan.p28); the official builds in the upstream [Releases](https://github.com/neardws/MijiaBar/releases) do not include these changes.",
 toc=["Features","Screenshots","Install","Sign in","Agent / MCP","Build from source","Credits"],
 dark="Dark mode",
 feat=["**QR sign-in** — scan with the Mi Home app, no password. Mainland China server by default; Europe, US, Russia, Singapore and India are one click away. Credentials stay in the macOS Keychain.",
@@ -46,6 +47,7 @@ credits="Motion design contributed by [@skyswordw](https://github.com/skyswordw)
 lic="MIT License.")
 T['zh-Hans']=dict(tag="在 macOS 菜单栏控制米家设备，也可以交给 AI Agent 来控制。",
 note="非小米官方项目。使用与米家 App 相同的云端接口和局域网 miIO 协议。",
+fork="**Fork 说明**：本仓库是 [neardws/MijiaBar](https://github.com/neardws/MijiaBar) 的 fork，仓库名 **MijiaBar-Fork-Plus**，由 [@leotpp](https://github.com/leotpp) 维护；上游的 MIT 许可证与版权声明原样保留在 [LICENSE](LICENSE)。本 fork 新增风扇详情页的「上下摆头」「上下摆角」（dmaker.fan.p28 真机验证）；上游 [Releases](https://github.com/neardws/MijiaBar/releases) 的官方安装包不含这些改动。",
 toc=["功能","截图","安装","登录","Agent / MCP","从源码构建","致谢"],dark="深色模式",
 feat=["**扫码登录**：用米家 App 扫一扫，无需密码。默认中国大陆服务器，也可切换欧洲、美国、俄罗斯、新加坡、印度。凭据只存在 macOS 钥匙串。",
 "**自动获取设备**：拉取所有家庭、房间和共享设备及在线状态；离线和久未使用的设备默认隐藏。",
@@ -71,6 +73,7 @@ credits="动效设计由 [@skyswordw](https://github.com/skyswordw) 贡献（[#1
 lic="MIT 许可证。")
 T['zh-Hant']=dict(tag="在 macOS 選單列控制米家裝置，也可以交給 AI Agent 來控制。",
 note="非小米官方專案。使用與米家 App 相同的雲端介面和區域網路 miIO 協定。",
+fork="**Fork 說明**：本倉庫是 [neardws/MijiaBar](https://github.com/neardws/MijiaBar) 的 fork，倉庫名 **MijiaBar-Fork-Plus**，由 [@leotpp](https://github.com/leotpp) 維護；上游的 MIT 授權與版權聲明原樣保留在 [LICENSE](LICENSE)。本 fork 新增風扇詳細頁的「上下擺頭」「上下擺角」（dmaker.fan.p28 實機驗證）；上游 [Releases](https://github.com/neardws/MijiaBar/releases) 的官方安裝檔不含這些改動。",
 toc=["功能","截圖","安裝","登入","Agent / MCP","從原始碼建置","致謝"],dark="深色模式",
 feat=["**掃碼登入**：用米家 App 掃一掃，免密碼。預設中國大陸伺服器，也可切換歐洲、美國、俄羅斯、新加坡、印度。憑證只存在 macOS 鑰匙圈。",
 "**自動取得裝置**：載入所有家庭、房間和共享裝置及上線狀態；離線和久未使用的裝置預設隱藏。",
@@ -121,7 +124,7 @@ mijiabar mcp                      # stdio MCP server
 mijiabar setup-prompt             # print the agent setup instructions
 ```'''
 build='''```bash
-git clone https://github.com/neardws/MijiaBar && cd MijiaBar
+git clone https://github.com/leotpp/MijiaBar-Fork-Plus && cd MijiaBar-Fork-Plus
 swift build
 .build/debug/MijiaBarApp --snapshot docs/screenshots   # demo-data screenshots
 scripts/package.sh   # dist/MijiaBar.app + DMG (signs & notarizes when a Developer ID is available)
@@ -140,6 +143,7 @@ for lang,fn in files.items():
     o=[f'<p align="center"><img src="Resources/AppIcon.png" width="96" alt="MijiaBar"></p>' if os.path.exists('Resources/AppIcon.png') else '',
        '<h1 align="center">MijiaBar</h1>',f'<p align="center">{t["tag"]}</p>','',badges,'',f'<p align="center">{sw}</p>','',
        f'> {t["note"]}','',
+       f'> {t["fork"]}','',
        '<p align="center"><img src="https://files.neardws.com/mijiabar/readme/demo.gif" width="300" alt="demo"></p>','',
        ' · '.join(f'[{h}](#{anchor(h)})' for h in toc),'',
        f'## {toc[0]}','']+[f'- {x}' for x in t['feat']]+['',

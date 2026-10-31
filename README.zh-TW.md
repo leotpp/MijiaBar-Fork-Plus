@@ -16,6 +16,8 @@
 
 > 非小米官方專案。使用與米家 App 相同的雲端介面和區域網路 miIO 協定。
 
+> **Fork 說明**：本倉庫是 [neardws/MijiaBar](https://github.com/neardws/MijiaBar) 的 fork，倉庫名 **MijiaBar-Fork-Plus**，由 [@leotpp](https://github.com/leotpp) 維護；上游的 MIT 授權與版權聲明原樣保留在 [LICENSE](LICENSE)。本 fork 新增風扇詳細頁的「上下擺頭」「上下擺角」（dmaker.fan.p28 實機驗證）；上游 [Releases](https://github.com/neardws/MijiaBar/releases) 的官方安裝檔不含這些改動。
+
 <p align="center"><img src="https://files.neardws.com/mijiabar/readme/demo.gif" width="300" alt="demo"></p>
 
 [功能](#功能) · [截圖](#截圖) · [安裝](#安裝) · [登入](#登入) · [預設隱藏規則](#預設隱藏規則) · [攝影機直播](#攝影機直播) · [Agent / MCP](#agent--mcp) · [從原始碼建置](#從原始碼建置) · [資料存放位置](#資料存放位置) · [致謝](#致謝)
@@ -129,7 +131,7 @@ MCP 工具：`list_devices`、`get_device_state`、`set_property`、`run_action`
 ## 從原始碼建置
 
 ```bash
-git clone https://github.com/neardws/MijiaBar && cd MijiaBar
+git clone https://github.com/leotpp/MijiaBar-Fork-Plus && cd MijiaBar-Fork-Plus
 swift build
 .build/debug/MijiaBarApp --snapshot docs/screenshots   # demo-data screenshots
 scripts/package.sh   # dist/MijiaBar.app + DMG (signs & notarizes when a Developer ID is available)

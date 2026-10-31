@@ -16,6 +16,8 @@
 
 > Unofficial project, not affiliated with Xiaomi. It uses the same cloud API as the Mi Home app plus the LAN miIO protocol.
 
+> **Fork note.** This repository is a fork of [neardws/MijiaBar](https://github.com/neardws/MijiaBar), renamed **MijiaBar-Fork-Plus** and maintained by [@leotpp](https://github.com/leotpp). The upstream MIT license and copyright notice are kept unchanged in [LICENSE](LICENSE). This fork adds vertical swing and tilt-angle controls to the fan detail page (verified on a dmaker.fan.p28); the official builds in the upstream [Releases](https://github.com/neardws/MijiaBar/releases) do not include these changes.
+
 <p align="center"><img src="https://files.neardws.com/mijiabar/readme/demo.gif" width="300" alt="demo"></p>
 
 [Features](#features) · [Screenshots](#screenshots) · [Install](#install) · [Sign in](#sign-in) · [Auto-hidden devices](#auto-hidden-devices) · [Live video (cameras)](#live-video-cameras) · [Agent / MCP](#agent--mcp) · [Build from source](#build-from-source) · [Where data is stored](#where-data-is-stored) · [Credits](#credits)
@@ -129,7 +131,7 @@ MCP tools: `list_devices`, `get_device_state`, `set_property`, `run_action`.
 ## Build from source
 
 ```bash
-git clone https://github.com/neardws/MijiaBar && cd MijiaBar
+git clone https://github.com/leotpp/MijiaBar-Fork-Plus && cd MijiaBar-Fork-Plus
 swift build
 .build/debug/MijiaBarApp --snapshot docs/screenshots   # demo-data screenshots
 scripts/package.sh   # dist/MijiaBar.app + DMG (signs & notarizes when a Developer ID is available)
