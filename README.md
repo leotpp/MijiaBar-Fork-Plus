@@ -63,6 +63,7 @@ Requires macOS 14 or later, Apple silicon or Intel.
 
 ## Update notes
 
+- **0.1.17** (2026-11-06) — Sign-in renews itself: when the Mi cloud session token expires, the app now mints a fresh one with the stored `passToken` and replays the request instead of showing `HTTP 426` on every device. If the refresh is refused (no stored `passToken`, or the server rejects it), it falls back to the existing "Session expired, please scan again" prompt. Verified on a real account: a deliberately broken token healed itself without scanning, and the new session was written back to the Keychain.
 - **0.1.16** (2026-10-31) — Fan detail page: vertical swing and tilt-angle controls, verified on a dmaker.fan.p28. First release published from this fork.
 - Earlier versions are inherited from upstream [neardws/MijiaBar](https://github.com/neardws/MijiaBar).
 
