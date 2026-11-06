@@ -63,6 +63,7 @@ Requires macOS 14 or later, Apple silicon or Intel.
 
 ## Update notes
 
+- **0.1.19** (2026-11-06) — The updater now declares Sparkle's gentle-reminder support, so a menu bar app no longer logs a background-app warning when it checks for updates on a schedule, and scheduled alerts are presented the way Sparkle intends for dockless apps. No change to device control.
 - **0.1.18** (2026-11-06) — Auto-update is wired up. The app now reads its update feed from this repository's GitHub releases instead of the upstream site, and update archives are signed with this fork's own EdDSA key. Builds up to 0.1.17 still carry the upstream feed and public key, so install 0.1.18 by hand once; updates arrive automatically from then on. Packaging also gained a credential gate: it now refuses to produce a bundle that contains anything resembling a sign-in token, a LAN address or a local device identifier.
 - **0.1.17** (2026-11-06) — Sign-in renews itself: when the Mi cloud session token expires, the app now mints a fresh one with the stored `passToken` and replays the request instead of showing `HTTP 426` on every device. If the refresh is refused (no stored `passToken`, or the server rejects it), it falls back to the existing "Session expired, please scan again" prompt. Verified on a real account: a deliberately broken token healed itself without scanning, and the new session was written back to the Keychain.
 - **0.1.16** (2026-10-31) — Fan detail page: vertical swing and tilt-angle controls, verified on a dmaker.fan.p28. First release published from this fork.
