@@ -18,8 +18,8 @@
   <key>NSLocalNetworkUsageDescription</key><string>MijiaBar 需要访问局域网，直接与米家设备通信（miIO 协议，UDP 54321）。</string>
   <key>NSHumanReadableCopyright</key><string>© 2026 neardws · MIT License</string>
   <!-- Sparkle 2：应用内自动更新（EdDSA） -->
-  <key>SUFeedURL</key><string>https://www.neardws.com/MijiaBar/appcast.xml</string>
-  <key>SUPublicEDKey</key><string>CCM7RPQimyjvvf3oCtszbmQ1hQArwEl1FwPQTVLolb4=</string>
+  <key>SUFeedURL</key><string>https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest/download/appcast.xml</string>
+  <key>SUPublicEDKey</key><string>jgj5ErrzZtM94BT/+IMLLrAq0SP1l3j8/lIhyMSEDiE=</string>
   <key>SUEnableAutomaticChecks</key><true/>
   <key>SUScheduledCheckInterval</key><integer>86400</integer>
   <key>SUAutomaticallyUpdate</key><false/>

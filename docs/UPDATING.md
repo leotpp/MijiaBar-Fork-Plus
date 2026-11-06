@@ -53,8 +53,8 @@ DMG 压缩、文件系统分配与签名都会影响最终大小。本次仅测�
 
 | 键 | 值 |
 | --- | --- |
-| `SUFeedURL` | `https://www.neardws.com/MijiaBar/appcast.xml` |
-| `SUPublicEDKey` | `CCM7RPQimyjvvf3oCtszbmQ1hQArwEl1FwPQTVLolb4=`（公钥，可提交） |
+| `SUFeedURL` | `https://github.com/leotpp/MijiaBar-Fork-Plus/releases/latest/download/appcast.xml` |
+| `SUPublicEDKey` | 本 fork 的 EdDSA 公钥，见 `Resources/Info.plist`（可提交） |
 
 **私钥**只在维护者机器上：
 
@@ -62,23 +62,37 @@ DMG 压缩、文件系统分配与签名都会影响最终大小。本次仅测�
 ~/mijiabar-private/sparkle/eddsa_priv.key
 ```
 
-Keychain 账户名：`mijiabar`。切勿把私钥或 `~/mijiabar-private/` 提交进仓库。
+私钥文件权限应为 `0600`；签名脚本通过 `--ed-key-file` 使用它。切勿把私钥或 `~/mijiabar-private/` 提交进仓库、写入日志或作为 Release 资产上传。
 
-### 发版流程
+### ad-hoc 发版流程
 
-1. `VERSION=x.y.z scripts/package.sh` — 签名、公证、生成 `docs/appcast.xml`
-2. 把公证后的 `dist/MijiaBar-x.y.z.dmg` 上传到 GitHub Release `v x.y.z`
-3. 运行 `python3 scripts/gen-site.py`（网页里的版本号取自 appcast），把更新后的 `docs/appcast.xml` 和 `docs/*.html` 提交并推送到 `main`，GitHub Pages 会托管 appcast
-4. 已安装 **带 Sparkle 的构建**（≥ 本次）的用户会自动/手动检查到更新
+1. 执行 `VERSION=0.1.18 SIGN_IDENTITY=- scripts/package.sh`（后续替换版本号）。脚本先对 App 做完整 ad-hoc 代码签名与凭据扫描，门禁通过才生成 `dist/MijiaBar-0.1.18-unsigned.dmg`，再用自有 EdDSA 私钥签名更新档案，输出 `docs/appcast.xml` 与相同内容的 `dist/appcast.xml`。无需 Apple 公证；有 Developer ID 时仍按原流程签名、公证。`SKIP_APPCAST=1` 可显式跳过更新源生成。
+2. 检查凭据门禁、`codesign --verify --strict --verbose=2 dist/MijiaBar.app` 与 appcast 中的版本、下载 URL、EdDSA 签名。App 只能使用客户自己扫码后保存在其钥匙串的凭据，不能复制维护者的 session、设备缓存或偏好到产物。
+3. 创建本仓库 GitHub Release `v0.1.18`，**同时上传 DMG 和 `dist/appcast.xml`**，后者资产名必须为 `appcast.xml`。`latest` feed 依赖 GitHub 将该正式 Release 识别为最新版本；草稿或预发布不作为此 feed 的发版流程。
+4. 发布后核对上述 feed URL 和 appcast 的 DMG URL 可下载。客户端按既有设置自动检查，也可手动检查更新；安装更新仍遵循 Sparkle 提示。
+5. 如需同步网站版本，运行 `python3 scripts/gen-site.py`（版本号来自 `docs/appcast.xml`），另行提交生成文件；客户端 feed 由 GitHub Release 资产提供。
 
-### 从 0.1.8 迁移
+ad-hoc 更新仍要求下载后 App 自身代码签名完整，且内置 `SUPublicEDKey` 与本 fork 的签名私钥匹配。EdDSA 签名不替代首次安装时的 macOS 隔离检查。
 
-0.1.8 及更早没有 Sparkle，**不会**自动升上来。需要手动安装一次带 Sparkle 的版本（本站或 Release DMG），之后才走自动更新。
+### 首次迁移与密钥轮换
+
+**0.1.17 及更早仍携带上游 feed 和公钥，须手动安装一次 0.1.18，之后才能从本 fork 接收自动更新。** 更早没有 Sparkle 的版本也必须手动迁移。
+
+**直接更换 EdDSA 密钥会让信任旧公钥的安装无法自动更新，用户需要手动安装一次携带新公钥的版本。** 保管好当前私钥，不要在每次发版时重新生成；不要移除 App 的公钥。计划无缝轮换时须另行设计并验证 Sparkle 的迁移流程。
 
 ### 仅重签 appcast
 
 ```bash
-VERSION=x.y.z DMG_PATH=dist/MijiaBar-x.y.z.dmg scripts/generate-appcast.sh
+VERSION=x.y.z DMG_PATH=dist/MijiaBar-x.y.z-unsigned.dmg scripts/generate-appcast.sh
+```
+
+脚本也支持不带 `-unsigned` 的 DMG，下载 URL 保留实际文件名。默认仓库为 `leotpp/MijiaBar-Fork-Plus`；可用 `RELEASE_REPO`、`APP_LINK`、`DOWNLOAD_URL_PREFIX` 或 `DOWNLOAD_URL` 覆盖归属与下载地址，App 中的 `SUFeedURL` 需另行同步。
+
+仅本地试跑时同时覆盖两份输出，避免改动正式 feed：
+
+```bash
+APPCAST_PATH=/tmp/mijiabar-appcast.xml RELEASE_APPCAST_PATH=/tmp/mijiabar-release/appcast.xml \
+  DMG_PATH=dist/MijiaBar-0.1.17-unsigned.dmg scripts/generate-appcast.sh
 ```
 
 ## GitHub Pages
