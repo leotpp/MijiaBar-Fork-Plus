@@ -11,7 +11,7 @@ cd "$(dirname "$0")/.."
 scripts/fetch-sparkle.sh
 SP=.build/sparkle/2.10.0
 KEY="${SPARKLE_KEY:-$HOME/mijiabar-private/sparkle/eddsa_priv.key}"
-[ -f "$KEY" ] || { echo "❌ 找不到 Sparkle 私钥: $KEY（切勿提交到仓库）"; exit 1; }
+[ -f "$KEY" ] || { echo "❌ 找不到 Sparkle 私钥: ${KEY}（默认 ~/mijiabar-private/sparkle/eddsa_priv.key，可用 SPARKLE_KEY 指定；切勿提交到仓库）"; exit 1; }
 
 VERSION="${VERSION:-}"
 DMG_PATH="${DMG_PATH:-}"

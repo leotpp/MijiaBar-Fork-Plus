@@ -139,7 +139,11 @@ if [ "$SIGN_IDENTITY" != "-" ]; then
 fi
 echo "✅ $DMG"
 
-# 两种签名方式都生成更新源；私钥不在仓库。
+# 两种签名方式有私钥时都生成更新源；私钥不在仓库。
 if [ "${SKIP_APPCAST:-0}" != "1" ] && [ -f "$DMG" ]; then
-  VERSION="$VERSION" DMG_PATH="$DMG" scripts/generate-appcast.sh
+  if [ -f "${SPARKLE_KEY:-$HOME/mijiabar-private/sparkle/eddsa_priv.key}" ]; then
+    VERSION="$VERSION" DMG_PATH="$DMG" scripts/generate-appcast.sh
+  else
+    echo "⏭ 跳过 appcast（未找到 Sparkle 私钥）"
+  fi
 fi
