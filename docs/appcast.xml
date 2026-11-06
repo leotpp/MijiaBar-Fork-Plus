@@ -3,13 +3,13 @@
     <channel>
         <title>MijiaBar</title>
         <item>
-            <title>0.1.19</title>
-            <pubDate>Fri, 06 Nov 2026 18:35:21 +0800</pubDate>
+            <title>0.1.20</title>
+            <pubDate>Fri, 06 Nov 2026 20:04:44 +0800</pubDate>
             <link>https://github.com/leotpp/MijiaBar-Fork-Plus</link>
-            <sparkle:version>0.1.19</sparkle:version>
-            <sparkle:shortVersionString>0.1.19</sparkle:shortVersionString>
+            <sparkle:version>0.1.20</sparkle:version>
+            <sparkle:shortVersionString>0.1.20</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/leotpp/MijiaBar-Fork-Plus/releases/download/v0.1.19/MijiaBar-0.1.19-unsigned.dmg" length="71286252" type="application/octet-stream" sparkle:edSignature="us6elOxYQWRm6OGkYbLQIcF/k956ewLIqDIoNb5eKL9oluhtbPTCxFp8hmvyK5lNojKhVweDzI9L1G8NJE3GBg==" />
+            <enclosure url="https://github.com/leotpp/MijiaBar-Fork-Plus/releases/download/v0.1.20/MijiaBar-0.1.20-unsigned.dmg" length="71677189" type="application/octet-stream" sparkle:edSignature="FRdgXGa5kScXYcITE02jkzIq9LxAnVGo3c3VDuE0aNbmCcVYUhe/QIoilhbMYoBG+Lzzv58POEJtoXo6qCQ7Cg==" />
         </item>
     </channel>
 </rss>

@@ -3,7 +3,7 @@
 #   有 Developer ID 证书时：hardened runtime 签名 → 公证 → staple
 #   没有证书时：ad-hoc 签名，DMG 文件名带 -unsigned
 # 环境变量：
-#   VERSION         版本号（默认 0.1.19）
+#   VERSION         版本号（默认 0.1.20）
 #   ARCHS           默认 "--arch arm64 --arch x86_64"
 #   SIGN_IDENTITY   签名身份；默认自动找 "Developer ID Application"，设为 "-" 强制 ad-hoc
 #   NOTARY_PROFILE  notarytool 钥匙串配置名（默认 MijiaBar-notary）；设为空跳过公证
@@ -13,7 +13,7 @@ cd "$(dirname "$0")/.."
 HOUSE_STYLE_BUNDLE="${HOUSE_STYLE_BUNDLE:-all}"
 case "$HOUSE_STYLE_BUNDLE" in all|default) ;; *) echo "Invalid HOUSE_STYLE_BUNDLE: $HOUSE_STYLE_BUNDLE" >&2; exit 1 ;; esac
 export HOUSE_STYLE_BUNDLE
-VERSION="${VERSION:-0.1.19}"
+VERSION="${VERSION:-0.1.20}"
 ARCHS="${ARCHS:---arch arm64 --arch x86_64}"
 NOTARY_PROFILE="${NOTARY_PROFILE-MijiaBar-notary}"
 ENT=Resources/MijiaBar.entitlements
