@@ -169,8 +169,9 @@ Exact widths, stairs and fallback pairs are listed in
 [HOUSE.md, Issue #58 acceptance status](HOUSE.md#issue-58-acceptance-status-2026-10-27).
 The shared pet snapshot layout also has a regression test for a bedroom-to-study route containing only non-jump
 edges. Its rooms are all level 0, so stairs are expected only in the auto-level fixture/classic layouts.
-The classic hand-drawn `house-cutaway.json` and PNGs from `scripts/gen-house-cutaway-art.py` remain unchanged
-and need new source art later; pets continue to force the composer for classic geometry.
+Classic four now uses flat composed modules with doorways even for builtin/palette styles without pets;
+pets retain their composed path. The hand-drawn `house-cutaway.json` and PNGs remain bake/reference/fixtures
+tooling inputs and a missing-composed-assets fallback, not a pending live-doorway art update.
 A* adds **six walk-cell lengths** to every jump's geometric distance, preferring nearby
 doorways without forbidding a substantially shorter cat hop. The Euclidean heuristic
 remains admissible. A* caches paths;

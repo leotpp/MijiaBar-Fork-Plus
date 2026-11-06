@@ -95,6 +95,41 @@ APPCAST_PATH=/tmp/mijiabar-appcast.xml RELEASE_APPCAST_PATH=/tmp/mijiabar-releas
   DMG_PATH=dist/MijiaBar-0.1.17-unsigned.dmg scripts/generate-appcast.sh
 ```
 
+## 上游同步
+
+本地 `origin` 指向上游 `https://github.com/neardws/MijiaBar.git`，`fork` 指向自己的 `leotpp/MijiaBar-Fork-Plus`。工具不会修改 remote，也不会 push、发布或打 tag；运行前可用 `git remote -v` 核对。
+
+### 手动检查与合并
+
+```bash
+scripts/sync-upstream.sh          # 默认 --check，只 fetch 和报告差异
+scripts/sync-upstream.sh --check  # 上游/本地各领先多少，以及未合并的上游提交
+scripts/sync-upstream.sh --merge  # 同样先检查，再双父合并 origin/main 到当前分支
+```
+
+有无新提交时检查都返回 0；拉取失败返回非零并明确报错。合并要求工作树干净，请先切换到要同步的分支。无冲突时 Git 自动创建 merge commit；冲突时脚本返回非零并保留现场，不自动解决或提交，可手动解决后提交，或用 `git merge --abort` 撤销。本 fork 的额外提交会计入「本地领先」，不代表需要删除或回退。
+
+### 自动提醒
+
+`.github/workflows/upstream-watch.yml` 每周一 UTC 03:23 检查一次，也可从 Actions 手动运行 `workflow_dispatch`。它读取 fork 的 `main`，显式拉取上游 main（CI 的 origin 是 fork），有新提交时创建或更新固定标题「上游 MijiaBar 有新提交」的未关闭 issue，正文包含提交列表及本地合并命令；没有新提交时不操作 issue。拉取失败只记录 workflow 错误，不创建提醒。只授予 `contents: read` 和 `issues: write`；并发检查串行执行，避免重复创建。文件推送到 fork 默认分支后才生效，须在仓库启用 Actions 和 Issues。此提醒不自动判定提交是否重要，也不自动合并或发布。
+
+### 合并后检查清单
+
+- [ ] 运行 `python3 scripts/gen-readme.py`，核对三个 README 最前面的 fork 更新记录（目前 0.1.19、0.1.18、0.1.17）仍保留，上游条目在其后，不手改生成 README。
+- [ ] 若 `i18n/*.tsv` 或 `Sources/MijiaCore/Translations.swift` 有变化，运行 `python3 scripts/gen-i18n.py`，以源表生成结果为准。
+- [ ] 检查 `docs/appcast.xml` 的版本、下载 URL、签名仍属于本 fork；`Resources/Info.plist` 的 `SUFeedURL` 应为本 fork Releases feed，`SUPublicEDKey` 保持本 fork 公钥，`SUAutomaticallyUpdate` 保持 false。不因同步上游而改动 App 的检查/安装行为。
+- [ ] appcast 被上游覆盖时先恢复本 fork 已发布的原件；只有持有对应 DMG、确需重签时才运行 `scripts/generate-appcast.sh`（默认输出 `docs/appcast.xml`，同时生成 `dist/appcast.xml`），核对版本/签名，不为代码同步重新签署旧发布。
+- [ ] 核对 `.github/workflows/build.yml`、`scripts/package.sh`、`scripts/scan-*.sh`、`scripts/generate-appcast.sh` 的 fork 发布归属、凭据门禁与签名流程没有回退。
+- [ ] 运行 `swift build`、`scripts/test.sh`、`scripts/scan-secrets.sh`、`git diff --check`。上游改 UI 时运行 `.build/debug/MijiaBarApp --snapshot /tmp/mijiabar-upstream-shots -AppleLanguages "(zh-Hans)"` 并查看浅/深色演示图，不提交真实设备快照。
+- [ ] 保留 merge 双父历史；若自动合并已经提交，生成物修正和验证结果可另作后续提交。推送、tag、Release 与安装仍由维护者另行决定，自己的发布继续上传到本 fork Releases。
+
+### 已知冲突热点
+
+- `scripts/gen-readme.py` 的三语更新列表及三个生成 README：两边都会添加更新条目，脚本与生成物须一致。
+- `i18n/zh-Hant.tsv` 和 `Sources/MijiaCore/Translations.swift`：新增字符串可能重叠，先合并源表再生成。
+- `Resources/Info.plist`、`docs/appcast.xml` 与发布/扫描脚本：上游 feed、公钥、版本及发布归属不能覆盖 fork 配置。
+- `Sources/MijiaBarApp/TypeDetails.swift`、`AppModel.swift` 及 `Sources/MijiaCore/XiaomiCloud.swift`：上游设备详情/控制演进可能与 fork 的会话续期、更新器调整相交，须结合测试核对行为。
+
 ## GitHub Pages
 
 站点文件在 `docs/`：`index.html`（英文）和 `zh-CN.html`（简体中文），由 `scripts/gen-site.py` 根据 `site/template.html` 和 `i18n/site/*.json` 生成，不要直接改（繁体中文等页面稳定后再加，译稿在 `i18n/site/drafts/zh-Hant.json`）；图片在 `docs/assets/`（`scripts/site-shots.sh` 生成）；另有 `appcast.xml`。

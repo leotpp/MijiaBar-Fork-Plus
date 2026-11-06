@@ -1,0 +1,64 @@
+name: Watch upstream
+
+on:
+  schedule:
+    - cron: '23 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: upstream-watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Check upstream commits
+        id: upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          # checkout 的 origin 是 fork，直接拉取上游，不改 remote 配置。
+          if ! git fetch https://github.com/neardws/MijiaBar.git refs/heads/main:refs/remotes/upstream/main; then
+            echo '::error::无法拉取上游，跳过 issue 提醒。'
+            exit 1
+          fi
+          count=$(git rev-list --count HEAD..refs/remotes/upstream/main)
+          echo "上游领先 $count 个提交"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          git log --format='- `%h` %s' HEAD..refs/remotes/upstream/main > "$RUNNER_TEMP/upstream-commits.md"
+      - name: Create or update reminder
+        if: steps.upstream.outputs.count != '0' && steps.upstream.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const title = '上游 MijiaBar 有新提交';
+            const commits = fs.readFileSync(path.join(process.env.RUNNER_TEMP, 'upstream-commits.md'), 'utf8');
+            const body = [
+              '上游 [neardws/MijiaBar](https://github.com/neardws/MijiaBar) 有本 fork main 尚未合并的提交：',
+              '', commits.trimEnd(), '',
+              '请在本地检查并合并（origin 应指向上游）：', '',
+              '```bash', 'scripts/sync-upstream.sh --check', 'scripts/sync-upstream.sh --merge', '```', '',
+              `合并后按 [上游同步清单](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/UPDATING.md#上游同步) 重新生成、检查和验证；发布仍使用本 fork Releases。`
+            ].join('\n');
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              ...context.repo, state: 'open', per_page: 100
+            });
+            const existing = issues.find(issue => !issue.pull_request && issue.title === title);
+            if (existing) {
+              if (existing.body !== body) {
+                await github.rest.issues.update({...context.repo, issue_number: existing.number, body});
+              }
+            } else {
+              await github.rest.issues.create({...context.repo, title, body});
+            }

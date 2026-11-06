@@ -26,7 +26,7 @@ struct DC {
         guard let p, let x = v(p) else { return nil }
         return displayValue(p, x)
     }
-    func label(_ p: SpecProperty) -> String { CardModel.label(p, spec) }
+    func label(_ p: SpecProperty) -> String { p.name == "target-position" ? L("目标位置", "Target position") : CardModel.label(p, spec) }
 }
 
 /// 所有设备详情共用的外壳：头部状态 + 右上角电源 → 拟物插画 → 内容
@@ -318,7 +318,9 @@ extension View {
     switch dc.device.category {
     case .fan: return dc.spec?.controlServices.flatMap(\.properties).first { $0.name == "fan-level" && $0.options != nil } ?? dc.p("fan-level") ?? dc.p("speed-level")
     case .light: return dc.p("brightness")
+    case .curtain: return dc.p("target-position")?.writable == true ? dc.p("target-position") : nil
     case .heater: return dc.p("target-temperature")
+    case .fridge, .waterHeater: return dc.p("target-temperature")?.writable == true ? dc.p("target-temperature") : nil
     case .dehumidifier, .humidifier: return dc.p("target-humidity")?.writable == true ? dc.p("target-humidity") : nil
     case .tv, .speaker: return dc.p("volume", in: "speaker") ?? dc.p("volume")
     default: return nil

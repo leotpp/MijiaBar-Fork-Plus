@@ -31,6 +31,15 @@ extension AppModel {
             dev("d13", L("厨房水浸", "Kitchen leak sensor"), "lumi.flood.agl02", L("厨房", "Kitchen"), home: "h2"),
             dev("d15", L("加湿器", "Humidifier"), "deerma.humidifier.demo", L("主卧", "Bedroom"), home: "h2"),
             dev("d16", L("扫地机", "Vacuum"), "roborock.vacuum.demo", L("客厅", "Living room"), home: "h2"),
+            dev("d17", L("冰箱", "Fridge"), "viomi.fridge.demo", L("厨房", "Kitchen"), home: "h2"),
+            dev("d18", L("洗衣机", "Washer"), "xiaomi.washer.demo", L("阳台", "Balcony"), home: "h2"),
+            dev("d19", L("热水器", "Water heater"), "viomi.waterheater.demo", L("浴室", "Bathroom"), home: "h2"),
+            dev("d20", L("客厅窗帘", "Living room curtain"), "lumi.curtain.demo", L("客厅", "Living room"), home: "h2"),
+            dev("d21", L("空气净化器", "Air purifier"), "zhimi.airpurifier.demo", L("客厅", "Living room"), home: "h2"),
+            dev("d22", L("取暖器", "Heater"), "zhimi.heater.demo", L("客厅", "Living room"), home: "h2"),
+            dev("d23", L("智能音箱", "Speaker"), "xiaomi.wifispeaker.demo", L("客厅", "Living room"), home: "h2"),
+            dev("d24", L("电饭煲", "Rice cooker"), "chunmi.cooker.demo", L("厨房", "Kitchen"), home: "h2"),
+            dev("d25", L("净水器", "Water purifier"), "yunmi.waterpuri.demo", L("厨房", "Kitchen"), home: "h2"),
         ]
         prefs.devices["d1"] = { var p = DevicePrefs(); p.favorite = true; return p }()
         prefs.devices["d2"] = { var p = DevicePrefs(); p.favorite = true; return p }()
@@ -60,8 +69,14 @@ extension AppModel {
         states["d5"] = DeviceState(values: ["2.1": .bool(true), "11.2": .double(36.5)], spec: plug, legacy: false, source: "cloud")
         let ht = DeviceSpec(type: "", description: "", services: [S(2, "temperature-humidity-sensor", [P(2, 1, "temperature", "float", ["read"], unit: "celsius"), P(2, 2, "relative-humidity", "uint8", ["read"], unit: "percentage")])])
         states["d6"] = DeviceState(values: ["2.1": .double(25.6), "2.2": .int(58)], spec: ht, legacy: false, source: "cloud")
-        let derh = DeviceSpec(type: "", description: "", services: [S(2, "dehumidifier", [P(2, 1, "on", "bool"), P(2, 5, "target-humidity", "uint8", range: [40, 70, 5], unit: "percentage")])])
-        states["d7"] = DeviceState(values: ["2.1": .bool(false), "2.5": .int(50)], spec: derh, legacy: false, source: "cloud")
+        let derh = DeviceSpec(type: "", description: "", services: [S(2, "dehumidifier", [
+            P(2, 1, "on", "bool"), P(2, 5, "target-humidity", "uint8", range: [40, 70, 5], unit: "percentage"),
+            P(2, 2, "mode", "uint8", opts: [ValueOption(value: 0, description: "Auto"), ValueOption(value: 1, description: "Manual")]),
+            P(2, 3, "fan-level", "uint8", opts: [ValueOption(value: 1, description: "Low"), ValueOption(value: 2, description: "Medium"), ValueOption(value: 3, description: "High")]),
+            P(2, 4, "physical-controls-locked", "bool"), P(2, 6, "tank-full", "bool", ["read"])]),
+            S(3, "environment", [P(3, 1, "temperature", "float", ["read"], unit: "celsius"),
+                                  P(3, 2, "relative-humidity", "uint8", ["read"], unit: "percentage")])])
+        states["d7"] = DeviceState(values: ["2.1": .bool(false), "2.5": .int(50), "2.2": .int(0), "2.3": .int(2), "2.4": .bool(false), "2.6": .bool(false), "3.1": .double(25.6), "3.2": .int(62)], spec: derh, legacy: false, source: "cloud")
         let cam = DeviceSpec(type: "", description: "", services: [S(2, "camera-control", [P(2, 1, "on", "bool"), P(2, 3, "night-shot", "uint8", opts: [ValueOption(value: 0, description: "Auto"), ValueOption(value: 1, description: "Off"), ValueOption(value: 2, description: "On")])])])
         states["d10"] = DeviceState(values: ["2.1": .bool(true), "2.3": .int(0)], spec: cam, legacy: false, source: "cloud")
         let bell = DeviceSpec(type: "", description: "", services: [S(2, "battery", [P(2, 1, "battery-level", "uint8", ["read"], range: [0, 100, 1], unit: "percentage")])])
@@ -92,6 +107,72 @@ extension AppModel {
             ]]
         ]])
         states["d16"] = DeviceState(values: ["2.1": .int(1), "3.1": .int(76)], spec: vacuum, legacy: false, source: "cloud")
+        let fridge = DeviceSpec(type: "", description: "", services: [S(2, "fridge", [
+            P(2, 1, "on", "bool"), P(2, 2, "target-temperature", "int8", range: [2, 8, 1], unit: "celsius"),
+            P(2, 3, "mode", "uint8", opts: [ValueOption(value: 0, description: "Auto"), ValueOption(value: 1, description: "Manual")]),
+            P(2, 4, "temperature", "int8", ["read"], unit: "celsius")])])
+        states["d17"] = DeviceState(values: ["2.1": .bool(true), "2.2": .int(4), "2.3": .int(0), "2.4": .int(5)], spec: fridge, legacy: false, source: "cloud")
+        let washer = DeviceSpec(type: "", description: "", services: [S(2, "washer", [
+            P(2, 1, "on", "bool"),
+            P(2, 2, "status", "uint8", ["read"], opts: [ValueOption(value: 1, description: "Busy"), ValueOption(value: 2, description: "Idle")]),
+            P(2, 3, "remaining-time", "uint16", ["read"], unit: "minutes"),
+            P(2, 4, "progress", "uint8", ["read"], range: [0, 100, 1], unit: "percentage")])])
+        states["d18"] = DeviceState(values: ["2.1": .bool(true), "2.2": .int(1), "2.3": .int(32), "2.4": .int(45)], spec: washer, legacy: false, source: "cloud")
+        let waterHeater = DeviceSpec(type: "", description: "", services: [S(2, "water-heater", [
+            P(2, 1, "on", "bool"), P(2, 2, "target-temperature", "uint8", range: [35, 75, 1], unit: "celsius"),
+            P(2, 3, "heating", "bool", ["read"]), P(2, 4, "temperature", "uint8", ["read"], unit: "celsius")])])
+        states["d19"] = DeviceState(values: ["2.1": .bool(true), "2.2": .int(55), "2.3": .bool(true), "2.4": .int(42)], spec: waterHeater, legacy: false, source: "cloud")
+        let curtain = DeviceSpec(type: "", description: "", services: [S(2, "curtain", [
+            P(2, 1, "current-position", "uint8", ["read"], range: [0, 100, 1], unit: "percentage"),
+            P(2, 2, "target-position", "uint8", range: [0, 100, 1], unit: "percentage"),
+            P(2, 3, "motor-control", "uint8", opts: [ValueOption(value: 0, description: "Open"),
+                ValueOption(value: 1, description: "Pause"), ValueOption(value: 2, description: "Close")])])])
+        states["d20"] = DeviceState(values: ["2.1": .int(100), "2.2": .int(100), "2.3": .int(1)], spec: curtain, legacy: false, source: "cloud")
+        let airPurifier = DeviceSpec(type: "", description: "", services: [S(2, "air-purifier", [
+            P(2, 1, "on", "bool"),
+            P(2, 2, "fan-level", "uint8", opts: [ValueOption(value: 1, description: "Low"), ValueOption(value: 2, description: "Medium"), ValueOption(value: 3, description: "High")]),
+            P(2, 3, "mode", "uint8", opts: [ValueOption(value: 0, description: "Auto"), ValueOption(value: 1, description: "Sleep"), ValueOption(value: 2, description: "Favorite")]),
+            P(2, 4, "filter-life-level", "uint8", ["read"], range: [0, 100, 1], unit: "percentage")]),
+            S(3, "environment", [P(3, 1, "pm2.5-density", "uint16", ["read"], unit: "µg/m³"),
+                                  P(3, 2, "relative-humidity", "uint8", ["read"], unit: "percentage")])])
+        states["d21"] = DeviceState(values: ["2.1": .bool(true), "2.2": .int(2), "2.3": .int(0), "2.4": .int(78), "3.1": .int(12), "3.2": .int(42)], spec: airPurifier, legacy: false, source: "cloud")
+        let heater = DeviceSpec(type: "", description: "", services: [S(2, "heater", [
+            P(2, 1, "on", "bool"), P(2, 2, "target-temperature", "uint8", range: [16, 30, 1], unit: "celsius"),
+            P(2, 3, "mode", "uint8", opts: [ValueOption(value: 0, description: "Auto"), ValueOption(value: 1, description: "Manual")]),
+            P(2, 4, "heat-level", "uint8", opts: [ValueOption(value: 1, description: "Low"), ValueOption(value: 2, description: "Medium"), ValueOption(value: 3, description: "High")]),
+            P(2, 5, "physical-controls-locked", "bool")]),
+            S(3, "environment", [P(3, 1, "temperature", "float", ["read"], unit: "celsius"),
+                                  P(3, 2, "relative-humidity", "uint8", ["read"], unit: "percentage")])])
+        states["d22"] = DeviceState(values: ["2.1": .bool(true), "2.2": .int(24), "2.3": .int(0), "2.4": .int(2), "2.5": .bool(false), "3.1": .double(21.5), "3.2": .int(45)], spec: heater, legacy: false, source: "cloud")
+        let speaker = DeviceSpec.parse(["services": [
+            ["iid": 2, "type": "urn:miot-spec-v2:service:play-control:0", "properties": [
+                ["iid": 1, "type": "urn:miot-spec-v2:property:playing-state:0", "format": "uint8", "access": ["read"], "value-list": [
+                    ["value": 1, "description": "Playing"], ["value": 2, "description": "Idle"]]]
+            ], "actions": [
+                ["iid": 1, "type": "urn:miot-spec-v2:action:previous:0", "in": []],
+                ["iid": 2, "type": "urn:miot-spec-v2:action:play:0", "in": []],
+                ["iid": 3, "type": "urn:miot-spec-v2:action:pause:0", "in": []],
+                ["iid": 4, "type": "urn:miot-spec-v2:action:next:0", "in": []]
+            ]],
+            ["iid": 3, "type": "urn:miot-spec-v2:service:speaker:0", "properties": [
+                ["iid": 1, "type": "urn:miot-spec-v2:property:volume:0", "format": "uint8", "access": ["read", "write"], "value-range": [0, 100, 1], "unit": "percentage"],
+                ["iid": 2, "type": "urn:miot-spec-v2:property:mute:0", "format": "bool", "access": ["read", "write"]]
+            ]]
+        ]])
+        states["d23"] = DeviceState(values: ["2.1": .int(1), "3.1": .int(60), "3.2": .bool(false)], spec: speaker, legacy: false, source: "cloud")
+        let cooker = DeviceSpec(type: "", description: "", services: [S(2, "cooker", [
+            P(2, 1, "status", "uint8", ["read"], opts: [ValueOption(value: 1, description: "Cooking"), ValueOption(value: 2, description: "Idle")]),
+            P(2, 2, "mode", "uint8", opts: [ValueOption(value: 0, description: "Rice"), ValueOption(value: 1, description: "Porridge")]),
+            P(2, 3, "left-time", "uint16", ["read"], unit: "minutes"),
+            P(2, 4, "temperature", "uint8", ["read"], unit: "celsius"),
+            P(2, 5, "target-temperature", "uint8", range: [40, 100, 1], unit: "celsius"),
+            P(2, 6, "heat-level", "uint8", range: [1, 3, 1]), P(2, 7, "alarm", "bool")])])
+        states["d24"] = DeviceState(values: ["2.1": .int(1), "2.2": .int(0), "2.3": .int(25), "2.4": .int(96), "2.5": .int(100), "2.6": .int(2), "2.7": .bool(true)], spec: cooker, legacy: false, source: "cloud")
+        let purifier = DeviceSpec(type: "", description: "", services: [S(2, "water-purifier", [
+            P(2, 1, "tds-out", "uint16", ["read"], unit: "ppm"),
+            P(2, 2, "tds-in", "uint16", ["read"], unit: "ppm"),
+            P(2, 3, "filter-life-level", "uint8", ["read"], range: [0, 100, 1], unit: "percentage")])])
+        states["d25"] = DeviceState(values: ["2.1": .int(8), "2.2": .int(180), "2.3": .int(72)], spec: purifier, legacy: false, source: "cloud")
         for d in devices { if let st = states[d.did], let t = Transport.from(st.source, device: d) { transports[d.did] = t } }
     }
 }
@@ -110,16 +191,21 @@ struct ArtGallery: View {
             ("printer", AnyView(PrinterArt(busy: true, error: false, tint: .blue)), AnyView(PrinterArt(busy: false, error: false, tint: .blue))),
             ("cooker", AnyView(CookerArt(cooking: true, tint: .orange)), AnyView(CookerArt(cooking: false, tint: .orange))),
             ("purifier", AnyView(PurifierArt(on: true, filter: 72, tint: .blue)), AnyView(PurifierArt(on: false, filter: 72, tint: .blue))),
-            ("heater", AnyView(ApplianceArt(kind: .heater, on: true, level: 0.6, tint: Theme.heat)), AnyView(ApplianceArt(kind: .heater, on: false, level: 0.6, tint: Theme.heat))),
-            ("dehumidifier", AnyView(ApplianceArt(kind: .dehumidifier, on: true, level: 0.4, tint: .cyan)), AnyView(ApplianceArt(kind: .dehumidifier, on: false, level: 0.4, tint: .cyan))),
+            ("heater", AnyView(HeaterArt(on: true, level: 0.6, tint: Theme.heat)), AnyView(HeaterArt(on: false, level: 0.6, tint: Theme.heat))),
+            ("dehumidifier", AnyView(DehumidifierArt(on: true, level: 0.4, tint: .cyan)), AnyView(DehumidifierArt(on: false, level: 0.4, tint: .cyan))),
             ("humidifier", AnyView(HumidifierArt(on: true, tint: .cyan)), AnyView(HumidifierArt(on: false, tint: .cyan))),
             ("vacuum", AnyView(VacuumArt(on: true, busy: true, tint: .cyan)), AnyView(VacuumArt(on: false, busy: false, tint: .cyan))),
+            ("fridge", AnyView(FridgeArt(on: true, tint: DeviceCategory.fridge.color)), AnyView(FridgeArt(on: false, tint: DeviceCategory.fridge.color))),
+            ("washer", AnyView(WasherArt(on: true, busy: true, tint: DeviceCategory.washer.color)), AnyView(WasherArt(on: false, busy: false, tint: DeviceCategory.washer.color))),
+            ("water-heater", AnyView(WaterHeaterArt(on: true, heating: true, tint: DeviceCategory.waterHeater.color)), AnyView(WaterHeaterArt(on: false, heating: false, tint: DeviceCategory.waterHeater.color))),
+            ("curtain", AnyView(CurtainArt(position: 1, tint: DeviceCategory.curtain.color)), AnyView(CurtainArt(position: 0, tint: DeviceCategory.curtain.color))),
+            ("curtain-half", AnyView(CurtainArt(position: 0.5, tint: DeviceCategory.curtain.color)), AnyView(CurtainArt(position: 0, tint: DeviceCategory.curtain.color))),
             ("thermo", AnyView(ThermoArt(temp: 25.6, tint: .mint)), AnyView(ThermoArt(temp: nil, tint: .mint))),
             ("motion", AnyView(MotionSensorArt(on: true, tint: .mint)), AnyView(MotionSensorArt(on: false, tint: .mint))),
             ("contact", AnyView(ContactSensorArt(on: true, open: true, tint: .mint)), AnyView(ContactSensorArt(on: false, open: nil, tint: .mint))),
             ("leak", AnyView(LeakSensorArt(on: true, wet: true, tint: .mint)), AnyView(LeakSensorArt(on: false, wet: nil, tint: .mint))),
             ("doorbell", AnyView(DoorbellArt(on: true, tint: .purple)), AnyView(DoorbellArt(on: false, tint: .purple))),
-            ("air purifier", AnyView(AirPurifierArt(on: true, level: 0.6, tint: .cyan)), AnyView(AirPurifierArt(on: false, level: 0.6, tint: .cyan))),
+            ("air-purifier", AnyView(AirPurifierArt(on: true, level: 0.6, tint: .cyan)), AnyView(AirPurifierArt(on: false, level: 0.6, tint: .cyan))),
             ("generic", AnyView(GenericArt(on: true, tint: .indigo)), AnyView(GenericArt(on: false, tint: .indigo))),
     ] }
     var body: some View {
@@ -236,6 +322,50 @@ enum Snapshot {
             m.page = .detail("d16"); render(root, f("vacuum"))
             m.states["d16"]?.values["2.1"] = .int(2); render(root, f("vacuum-idle"))
             m.states["d16"]?.values["2.1"] = .int(1)
+            m.page = .detail("d17"); render(root, f("fridge"))
+            m.states["d17"]?.values["2.1"] = .bool(false); render(root, f("fridge-off"))
+            m.states["d17"]?.values["2.1"] = .bool(true)
+            m.page = .detail("d18"); render(root, f("washer"))
+            m.states["d18"]?.values["2.2"] = .int(2)
+            m.states["d18"]?.values["2.3"] = .int(0)
+            m.states["d18"]?.values["2.4"] = .int(100); render(root, f("washer-idle"))
+            m.states["d18"]?.values["2.1"] = .bool(false); render(root, f("washer-off"))
+            m.states["d18"]?.values["2.1"] = .bool(true)
+            m.states["d18"]?.values["2.2"] = .int(1)
+            m.states["d18"]?.values["2.3"] = .int(32)
+            m.states["d18"]?.values["2.4"] = .int(45)
+            m.page = .detail("d19"); render(root, f("water-heater"))
+            m.states["d19"]?.values["2.3"] = .bool(false); render(root, f("water-heater-idle"))
+            m.states["d19"]?.values["2.1"] = .bool(false); render(root, f("water-heater-off"))
+            m.states["d19"]?.values["2.1"] = .bool(true)
+            m.states["d19"]?.values["2.3"] = .bool(true)
+            m.page = .detail("d20"); render(root, f("curtain"))
+            m.states["d20"]?.values["2.1"] = .int(50)
+            m.states["d20"]?.values["2.2"] = .int(50); render(root, f("curtain-half"))
+            m.states["d20"]?.values["2.1"] = .int(0)
+            m.states["d20"]?.values["2.2"] = .int(0); render(root, f("curtain-closed"))
+            m.states["d20"]?.values["2.1"] = .int(100)
+            m.states["d20"]?.values["2.2"] = .int(100)
+            m.page = .detail("d21"); render(root, f("air-purifier"))
+            m.states["d21"]?.values["2.1"] = .bool(false); render(root, f("air-purifier-off"))
+            m.states["d21"]?.values["2.1"] = .bool(true)
+            m.page = .detail("d22"); render(root, f("heater"))
+            m.states["d22"]?.values["2.1"] = .bool(false); render(root, f("heater-off"))
+            m.states["d22"]?.values["2.1"] = .bool(true)
+            m.page = .detail("d7"); render(root, f("dehumidifier-off"))
+            m.states["d7"]?.values["2.1"] = .bool(true); render(root, f("dehumidifier"))
+            m.states["d7"]?.values["2.6"] = .bool(true); render(root, f("dehumidifier-tank-full"))
+            m.states["d7"]?.values["2.6"] = .bool(false)
+            m.states["d7"]?.values["2.1"] = .bool(false)
+            m.page = .detail("d23"); render(root, f("speaker"))
+            m.states["d23"]?.values["2.1"] = .int(2); render(root, f("speaker-idle"))
+            m.states["d23"]?.values["2.1"] = .int(1)
+            m.page = .detail("d24"); render(root, f("cooker"))
+            m.states["d24"]?.values["2.1"] = .int(2)
+            m.states["d24"]?.values["2.3"] = .int(0); render(root, f("cooker-idle"))
+            m.states["d24"]?.values["2.1"] = .int(1)
+            m.states["d24"]?.values["2.3"] = .int(25)
+            m.page = .detail("d25"); render(root, f("purifier"))
             m.page = .detail("d6"); render(root, f("thermo-history"), size: CGSize(width: 360, height: 900))
             m.page = .detail("d12"); render(root, f("contact-history"), size: CGSize(width: 360, height: 640))
             LiveControls.snapshotWatching = true

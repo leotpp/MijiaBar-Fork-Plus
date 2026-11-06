@@ -12,6 +12,10 @@ struct TypeDetailView: View {
         case .fan: FanDetail(dc: dc)
         case .humidifier: HumidifierDetail(dc: dc)
         case .vacuum: VacuumDetail(dc: dc)
+        case .fridge: FridgeDetail(dc: dc)
+        case .washer: WasherDetail(dc: dc)
+        case .waterHeater: WaterHeaterDetail(dc: dc)
+        case .curtain: CurtainDetail(dc: dc)
         case .light: LightDetail(dc: dc)
         case .plug: PlugDetail(dc: dc)
         case .tv: TVDetail(dc: dc)
@@ -20,8 +24,10 @@ struct TypeDetailView: View {
         case .printer: PrinterDetail(dc: dc)
         case .kitchen: CookerDetail(dc: dc)
         case .purifier: PurifierDetail(dc: dc)
-        case .heater, .dehumidifier: ApplianceDetail(dc: dc)
+        case .heater: HeaterDetail(dc: dc)
+        case .dehumidifier: DehumidifierDetail(dc: dc)
         case .sensor: SensorDetail(dc: dc)
+        case .airPurifier: AirPurifierDetail(dc: dc)
         default: DeviceCardView(device: device, state: state).frame(width: cardWidth)
         }
     }
@@ -80,7 +86,8 @@ struct DeviceStatusCard: View {
     case .printer: PrinterArt(busy: false, error: false, tint: tint)
     case .kitchen: CookerArt(cooking: false, tint: tint)
     case .purifier: PurifierArt(on: false, filter: nil, tint: tint)
-    case .heater, .dehumidifier: ApplianceArt(kind: d.category, on: false, level: 0.3, tint: tint)
+    case .heater: HeaterArt(on: false, level: 0.3, tint: tint)
+    case .dehumidifier: DehumidifierArt(on: false, level: 0.3, tint: tint)
     case .humidifier: HumidifierArt(on: false, tint: tint)
     case .vacuum: VacuumArt(on: false, busy: false, tint: tint)
     case .sensor:
@@ -90,7 +97,11 @@ struct DeviceStatusCard: View {
         case .leak: LeakSensorArt(on: false, wet: nil, tint: tint)
         default: ThermoArt(temp: nil, tint: tint)
         }
-    case .other, .curtain, .fridge, .washer, .waterHeater: GenericArt(on: false, tint: tint)
+    case .fridge: FridgeArt(on: false, tint: tint)
+    case .washer: WasherArt(on: false, busy: false, tint: tint)
+    case .waterHeater: WaterHeaterArt(on: false, heating: false, tint: tint)
+    case .curtain: CurtainArt(position: 0, tint: tint)
+    case .other: GenericArt(on: false, tint: tint)
     case .airPurifier: AirPurifierArt(on: false, level: 0.5, tint: tint)
     }
 }
@@ -357,6 +368,37 @@ struct PurifierDetail: View {
     }
 }
 
+struct AirPurifierDetail: View {
+    @EnvironmentObject var m: AppModel
+    let dc: DC
+    var body: some View {
+        let device = dc.device, tint = device.category.color
+        let power = m.powerInfo(device), on = power?.isOn ?? false
+        let level = dc.p("fan-level") ?? dc.p("speed-level")
+        let particulate = dc.p("pm2.5-density"), quality = particulate ?? dc.p("air-quality-index")
+        let unit = quality.map { unitText($0) } ?? ""
+        TypeShell(device: device, tint: tint, isOn: on, title: on ? L("运行中", "Running") : L("已关闭", "Off"),
+                  subtitle: joined([L("空气净化器", "Air purifier"), dc.text(dc.p("mode"))]),
+                  powerOn: power?.isOn, onPower: powerHandler(m, device)) {
+            AirPurifierArt(on: on, level: propFraction(level, dc.num(level)), tint: tint)
+        } content: {
+            BigValue(value: dc.num(quality).map { fmt1($0) }, unit: particulate != nil && unit.isEmpty ? "µg/m³" : unit,
+                     caption: particulate != nil ? L("PM2.5", "PM2.5") : L("空气质量指数", "Air quality index"), dim: !on)
+            if let level, level.writable, level.options == nil, level.range != nil {
+                PropSlider(dc: dc, prop: level, colors: [tint.opacity(0.3), tint], enabled: on)
+            }
+            ReadoutRow(items: [("aqi.medium", dc.num(dc.p("filter-life-level")).map { L("滤芯寿命", "Filter life") + " \(Int($0))%" }),
+                               ("humidity.fill", dc.num(dc.p("relative-humidity")).map { L("湿度 ", "Humidity ") + "\(Int($0))%" })], tint: tint)
+            HStack(spacing: 8) {
+                PropTile(dc: dc, prop: dc.p("mode"), title: L("模式", "Mode"), icon: "slider.horizontal.3", tint: tint)
+                if let level, level.writable, level.options != nil {
+                    PropTile(dc: dc, prop: level, title: L("风速", "Fan"), icon: "wind", tint: tint)
+                }
+            }
+        }
+    }
+}
+
 struct HumidifierDetail: View {
     @EnvironmentObject var m: AppModel
     let dc: DC
@@ -379,6 +421,141 @@ struct HumidifierDetail: View {
                 PropTile(dc: dc, prop: dc.p("fan-level"), title: L("风速", "Fan"), icon: "wind", tint: tint)
                 PropTile(dc: dc, prop: dc.p("physical-controls-locked"), title: L("童锁", "Child lock"), icon: "lock", tint: tint)
             }
+        }
+    }
+}
+
+enum CurtainCommand: CaseIterable {
+    case open, pause, close
+    var title: String {
+        switch self {
+        case .open: return L("打开", "Open")
+        case .pause: return L("暂停", "Pause")
+        case .close: return L("关闭", "Close")
+        }
+    }
+    var icon: String {
+        switch self {
+        case .open: return "arrow.left.and.right"
+        case .pause: return "pause.fill"
+        case .close: return "arrow.right.and.line.vertical.and.arrow.left"
+        }
+    }
+    func option(in prop: SpecProperty?) -> ValueOption? {
+        guard let prop, prop.writable else { return nil }
+        let names: [String]
+        switch self {
+        case .open: names = ["open", "up"]
+        case .pause: names = ["pause", "stop"]
+        case .close: names = ["close", "down"]
+        }
+        return prop.options?.first { names.contains($0.description.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()) }
+    }
+}
+
+struct CurtainDetail: View {
+    @EnvironmentObject var m: AppModel
+    let dc: DC
+    var position: Double? { HouseDeviceState.curtainPosition(dc.state) }
+    var title: String {
+        guard let position else { return L("暂无读数", "No reading") }
+        if position == 1 { return L("全开", "Open") }
+        if position == 0 { return L("全关", "Closed") }
+        return "\(Int((position * 100).rounded()))%"
+    }
+    var body: some View {
+        let device = dc.device, tint = device.category.color
+        let motor = dc.p("motor-control"), target = primarySliderProp(dc)
+        let commands = CurtainCommand.allCases.filter { $0.option(in: motor) != nil }
+        let enabled = device.isOnline && !m.busy.contains(device.did)
+        TypeShell(device: device, tint: tint, isOn: device.isOnline, title: title, subtitle: L("窗帘", "Curtain")) {
+            CurtainArt(position: position ?? 0, tint: tint)
+        } content: {
+            BigValue(value: position.map { "\(Int(($0 * 100).rounded()))" }, unit: "%", caption: L("开合", "Position"), dim: !device.isOnline)
+            HStack(spacing: 8) {
+                ForEach(commands, id: \.self) { command in
+                    if let motor, let option = command.option(in: motor) {
+                        ActionTile(title: command.title, icon: command.icon, tint: tint) {
+                            m.write(device, motor.key, PropValue.int(option.value).coerced(to: motor.format))
+                        }.disabled(!enabled)
+                    }
+                }
+            }
+            if let target {
+                PropSlider(dc: dc, prop: target, colors: [tint.opacity(0.3), tint], enabled: enabled)
+            }
+            if commands.isEmpty && target == nil {
+                Text(L("只读", "Read only")).font(.system(size: Theme.TypeSize.caption)).foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+struct FridgeDetail: View {
+    @EnvironmentObject var m: AppModel
+    let dc: DC
+    var body: some View {
+        let device = dc.device, tint = device.category.color
+        let power = m.powerInfo(device), target = dc.p("target-temperature")
+        let on = power?.isOn ?? device.isOnline
+        TypeShell(device: device, tint: tint, isOn: on,
+                  title: power == nil ? (on ? L("在线", "Online") : L("离线", "Offline")) : (on ? L("运行中", "Running") : L("已关闭", "Off")),
+                  subtitle: joined([L("冰箱", "Fridge"), dc.text(dc.p("mode"))]),
+                  powerOn: power?.isOn, onPower: powerHandler(m, device)) {
+            FridgeArt(on: on, tint: tint)
+        } content: {
+            if let target {
+                BigValue(value: dc.num(target).map { fmt1($0) }, unit: "°C", caption: L("目标温度", "Target temperature"), dim: !on)
+                if target.writable { PropSlider(dc: dc, prop: target, colors: [Theme.cool, tint], enabled: on) }
+            }
+            ReadoutRow(items: [("thermometer.medium", dc.num(dc.p("temperature")).map { L("温度", "Temperature") + " \(fmt1($0))°C" })], tint: tint)
+            PropTile(dc: dc, prop: dc.p("mode"), title: L("模式", "Mode"), icon: "snowflake", tint: tint)
+        }
+    }
+}
+
+struct WasherDetail: View {
+    @EnvironmentObject var m: AppModel
+    let dc: DC
+    var body: some View {
+        let device = dc.device, tint = device.category.color
+        let power = m.powerInfo(device), remaining = dc.p("remaining-time")
+        let on = power?.isOn ?? device.isOnline
+        let busy = on && HouseDeviceState.busy(dc.state, otherwise: false)
+        TypeShell(device: device, tint: tint, isOn: on,
+                  title: !on ? L("已关闭", "Off") : dc.text(dc.p("status")) ?? L("在线", "Online"),
+                  subtitle: L("洗衣机", "Washer"), powerOn: power?.isOn, onPower: powerHandler(m, device)) {
+            WasherArt(on: on, busy: busy, tint: tint)
+        } content: {
+            if let remaining {
+                BigValue(value: dc.text(remaining), unit: unitText(remaining), caption: L("剩余时间", "Remaining"), dim: !on)
+            }
+            ReadoutRow(items: [("chart.bar.fill", dc.p("progress").flatMap { prop in dc.text(prop).map { L("进度", "Progress") + " " + $0 + unitText(prop) } }),
+                               ("battery.75percent", dc.num(dc.p("battery-level")).map { L("电量", "Battery") + " \(Int($0))%" })], tint: tint)
+            PropTile(dc: dc, prop: dc.p("mode"), title: L("模式", "Mode"), icon: "slider.horizontal.3", tint: tint)
+        }
+    }
+}
+
+struct WaterHeaterDetail: View {
+    @EnvironmentObject var m: AppModel
+    let dc: DC
+    var heating: Bool { dc.bool(dc.p("heating")) ?? HouseDeviceState.busy(dc.state, otherwise: false) }
+    var body: some View {
+        let device = dc.device, tint = device.category.color
+        let power = m.powerInfo(device), target = dc.p("target-temperature")
+        let on = power?.isOn ?? device.isOnline
+        TypeShell(device: device, tint: tint, isOn: on,
+                  title: !on ? L("已关闭", "Off") : (heating ? L("加热中", "Heating") : dc.text(dc.p("status")) ?? L("在线", "Online")),
+                  subtitle: L("热水器", "Water heater"), powerOn: power?.isOn, onPower: powerHandler(m, device)) {
+            WaterHeaterArt(on: on, heating: on && heating, tint: tint)
+        } content: {
+            if let target {
+                BigValue(value: dc.num(target).map { fmt1($0) }, unit: "°C", caption: L("目标温度", "Target temperature"), dim: !on)
+                if target.writable { PropSlider(dc: dc, prop: target, colors: [Theme.cool, Theme.heat], enabled: on) }
+            }
+            ReadoutRow(items: [("thermometer.medium", dc.num(dc.p("temperature")).map { L("温度", "Temperature") + " \(fmt1($0))°C" })], tint: tint)
+            PropTile(dc: dc, prop: dc.p("mode"), title: L("模式", "Mode"), icon: "slider.horizontal.3", tint: tint)
         }
     }
 }
@@ -441,29 +618,56 @@ struct VacuumDetail: View {
     }
 }
 
-// MARK: 取暖器 / 除湿机
-struct ApplianceDetail: View {
+// MARK: 取暖器
+struct HeaterDetail: View {
     @EnvironmentObject var m: AppModel
     let dc: DC
     var body: some View {
-        let d = dc.device, heater = d.category == .heater
-        let tint = heater ? Theme.heat : Color.cyan
+        let d = dc.device, tint = Theme.heat
         let on = m.powerInfo(d)?.isOn ?? false
-        let target = heater ? dc.p("target-temperature") : dc.p("target-humidity")
+        let target = dc.p("target-temperature")
         let hum = dc.num(dc.p("relative-humidity"))
-        let tankFull = dc.bool(dc.p("tank-full") ?? dc.p("water-tank-full"))
         TypeShell(device: d, tint: tint, isOn: on, title: on ? L("运行中", "Running") : L("已关闭", "Off"),
-                  subtitle: joined([heater ? L("取暖器", "Heater") : L("除湿机", "Dehumidifier"), dc.text(dc.p("mode")), tankFull == true ? L("水箱已满", "Tank full") : nil]),
+                  subtitle: joined([L("取暖器", "Heater"), dc.text(dc.p("mode"))]),
                   powerOn: on, onPower: powerHandler(m, d)) {
-            ApplianceArt(kind: d.category, on: on, level: heater ? propFraction(target, dc.num(target)) : (tankFull == true ? 1 : max(0.15, (hum ?? 40) / 100 * 0.6)), tint: tint)
+            HeaterArt(on: on, level: propFraction(target, dc.num(target)), tint: tint)
         } content: {
-            BigValue(value: dc.num(target).map { "\(Int($0))" }, unit: heater ? "°C" : "%", caption: heater ? L("目标温度", "Target") : L("目标湿度", "Target humidity"), dim: !on)
-            if let target { PropSlider(dc: dc, prop: target, colors: heater ? [Theme.cool, Color(red: 1, green: 0.85, blue: 0.4), Theme.heat] : [Theme.heat, .cyan, Theme.cool], enabled: on) }
+            BigValue(value: dc.num(target).map { "\(Int($0))" }, unit: "°C", caption: L("目标温度", "Target"), dim: !on)
+            if let target { PropSlider(dc: dc, prop: target, colors: [Theme.cool, Color(red: 1, green: 0.85, blue: 0.4), Theme.heat], enabled: on) }
             ReadoutRow(items: [("thermometer.medium", dc.num(dc.p("temperature")).map { L("室温 ", "Room ") + "\(PropValue.double($0))°C" }),
                                ("humidity.fill", hum.map { L("湿度 ", "Humidity ") + "\(Int($0))%" })], tint: tint)
             HStack(spacing: 8) {
                 PropTile(dc: dc, prop: dc.p("mode"), title: L("模式", "Mode"), icon: "slider.horizontal.3", tint: tint)
-                PropTile(dc: dc, prop: heater ? dc.p("heat-level") : dc.p("fan-level"), title: heater ? L("档位", "Level") : L("风速", "Fan"), icon: heater ? "flame" : "wind", tint: tint)
+                PropTile(dc: dc, prop: dc.p("heat-level"), title: L("档位", "Level"), icon: "flame", tint: tint)
+                PropTile(dc: dc, prop: dc.p("physical-controls-locked"), title: L("童锁", "Child lock"), icon: "lock", tint: tint)
+                PropTile(dc: dc, prop: dc.p("alarm"), title: L("提示音", "Sound"), icon: "bell", tint: tint)
+            }
+        }
+    }
+}
+
+// MARK: 除湿机
+struct DehumidifierDetail: View {
+    @EnvironmentObject var m: AppModel
+    let dc: DC
+    var body: some View {
+        let d = dc.device, tint = Color.cyan
+        let on = m.powerInfo(d)?.isOn ?? false
+        let target = dc.p("target-humidity")
+        let hum = dc.num(dc.p("relative-humidity"))
+        let tankFull = dc.bool(dc.p("tank-full") ?? dc.p("water-tank-full"))
+        TypeShell(device: d, tint: tint, isOn: on, title: on ? L("运行中", "Running") : L("已关闭", "Off"),
+                  subtitle: joined([L("除湿机", "Dehumidifier"), dc.text(dc.p("mode")), tankFull == true ? L("水箱已满", "Tank full") : nil]),
+                  powerOn: on, onPower: powerHandler(m, d)) {
+            DehumidifierArt(on: on, level: tankFull == true ? 1 : max(0.15, (hum ?? 40) / 100 * 0.6), tint: tint)
+        } content: {
+            BigValue(value: dc.num(target).map { "\(Int($0))" }, unit: "%", caption: L("目标湿度", "Target humidity"), dim: !on)
+            if let target { PropSlider(dc: dc, prop: target, colors: [Theme.heat, .cyan, Theme.cool], enabled: on) }
+            ReadoutRow(items: [("thermometer.medium", dc.num(dc.p("temperature")).map { L("室温 ", "Room ") + "\(PropValue.double($0))°C" }),
+                               ("humidity.fill", hum.map { L("湿度 ", "Humidity ") + "\(Int($0))%" })], tint: tint)
+            HStack(spacing: 8) {
+                PropTile(dc: dc, prop: dc.p("mode"), title: L("模式", "Mode"), icon: "slider.horizontal.3", tint: tint)
+                PropTile(dc: dc, prop: dc.p("fan-level"), title: L("风速", "Fan"), icon: "wind", tint: tint)
                 PropTile(dc: dc, prop: dc.p("physical-controls-locked"), title: L("童锁", "Child lock"), icon: "lock", tint: tint)
                 PropTile(dc: dc, prop: dc.p("alarm"), title: L("提示音", "Sound"), icon: "bell", tint: tint)
             }

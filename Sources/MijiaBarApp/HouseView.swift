@@ -94,7 +94,7 @@ struct HouseCutawayModule: Decodable {
     var petVisible: [[[Double]]]? = nil
 }
 
-/// 场景来源：经典四室 = 手绘整图 + house-cutaway.json（按模块名查）；
+/// 场景来源：经典四室 = 平地模块合成（按模块名查），缺资源时回退手绘整图；
 /// 自定义布局 = 模块合成图 + 合成场景（HouseComposer，按房间 key 查）。
 struct HouseSceneSource {
     let unlit: NSImage
@@ -112,6 +112,16 @@ struct HouseSceneSource {
             let fallback = HouseLayoutSolver.classicFour.map { HouseLayoutCell(room: roomKeys[$0.module] ?? $0.module, module: $0.module, col: $0.col, row: $0.row) }
             let cells = HouseLayoutSolver.isClassicGeometry(layout) ? HouseLayoutSolver.setAllLevels(layout ?? fallback, flat: true) : (layout ?? fallback)
             return HouseModuleAssets.composedScene(layout: cells, phase: phase, style: style, config: config)
+        }
+        if HouseStyles.info(style).hasClassicArt, HouseLayoutSolver.isClassicGeometry(layout) {
+            let fallback = HouseLayoutSolver.classicFour.map { HouseLayoutCell(room: roomKeys[$0.module] ?? $0.module, module: $0.module, col: $0.col, row: $0.row) }
+            let cells = HouseLayoutSolver.setAllLevels(layout ?? fallback, flat: true)
+            if let source = HouseModuleAssets.composedScene(layout: cells, phase: phase, style: style, config: config) {
+                var modules: [String: HouseCutawayModule] = [:]
+                for cell in cells { modules[cell.module] = source.scene.modules[cell.room] }
+                return HouseSceneSource(unlit: source.unlit, lit: source.lit,
+                                        scene: HouseCutawaySceneFile(size: source.scene.size, modules: modules, decorSlots: source.scene.decorSlots, freeDecor: source.scene.freeDecor, origin: source.scene.origin), byRoom: false, layout: cells)
+            }
         }
         if !HouseStyles.info(style).hasClassicArt {
             let classic = HouseLayoutSolver.isClassicGeometry(layout)

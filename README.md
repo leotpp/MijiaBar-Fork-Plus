@@ -27,7 +27,7 @@
 - **Automatic device list** — all homes, rooms and shared devices with online state. Offline and long-unused devices are hidden by default.
 - **House cutaway** — pixel-art isometric home at the top of the list: composed layouts draw room fixtures and appliances; tap them to toggle matched devices. Lighting stays local to each fixture, day/night art follows local time, and **Enlarge** opens a dedicated House window.
 - **House pets** — up to three customizable pixel cats and dogs; choose a palette or generate one from a photo analyzed only on your Mac.
-- **A page designed for each device type** — air conditioner, fan, light, plug, TV, speaker, camera, printer, kitchen appliances, water purifier, heater, dehumidifier and sensors, each with its own skeuomorphic illustration.
+- **A page designed for each device type** — air conditioner, fan, light, plug, TV, speaker, camera, printer, kitchen appliances, water purifier, humidifier, vacuum, fridge, washer, water heater, curtain, air purifier, heater, dehumidifier and sensors, each with its own skeuomorphic illustration.
 - **Restrained motion** — fast, non-bouncy springs (< 300 ms); fan blades spin with speed, the TV screen glows, heaters radiate; the power button ripples; sliders track 1:1, snap and tick the trackpad. Reduce Motion is respected.
 - **Keyboard first** — `↑/↓` select, `↩` open, `Space` power, `←/→` adjust the main slider, `/` search, `Esc` back, `⌘Q` quit.
 - **Light & dark** — follows the system appearance using semantic colors.

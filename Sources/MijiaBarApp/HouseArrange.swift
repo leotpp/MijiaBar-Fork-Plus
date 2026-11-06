@@ -31,8 +31,8 @@ struct HouseArrangeView: View {
                 }
                 .toggleStyle(.checkbox)
                 .disabled(m.houseLayoutCells == nil)
-                Text(L("拖动房间卡片交换位置；客厅占两格。最多 3×2。经典四室走整图，自定义布局才拼模块。卡片上的 ▲▼ 把房间地面抬高 / 降低一级（默认自动：后排两角高、前排右格低）。",
-                       "Drag room cards to swap. Living room takes two cells. Max 3×2. Classic four uses the single cutaway; custom layouts stitch modules. ▲▼ on a card raises / lowers that room's floor one step (default: back corners up, front right down)."))
+                Text(L("拖动房间卡片交换位置；客厅占两格。最多 3×2。经典四室也用模块合成，房间之间有门洞。卡片上的 ▲▼ 把房间地面抬高 / 降低一级（默认自动：后排两角高、前排右格低）。",
+                       "Drag room cards to swap. Living room takes two cells. Max 3×2. Classic four also composes modules with doorways between rooms. ▲▼ on a card raises / lowers that room's floor one step (default: back corners up, front right down)."))
                     .font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             .padding(16)
@@ -246,7 +246,7 @@ struct HouseArrangeView: View {
 
     private func refreshPreview() {
         // 同步合成：截图 CLI 的 RunLoop 等待很短，异步 Task 来不及
-        // 经典四室实际走整图（平地），预览也按平地合成，避免和真实小屋不一致
+        // 经典四室按平地合成，预览也保持平地，避免和真实小屋不一致
         let shown = HouseLayoutSolver.isClassicGeometry(m.houseEffectiveLayout) ? HouseLayoutSolver.setAllLevels(layout, flat: true) : layout
         if !HouseStyles.info(m.houseStyle).hasClassicArt {
             let start = CFAbsoluteTimeGetCurrent()

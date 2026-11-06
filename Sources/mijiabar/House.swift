@@ -16,7 +16,7 @@ let houseUsage = """
   mijiabar house layout [--json]                     有效格子布局与 source（saved / auto / classic）
   mijiabar house layout set <房间:模块:col:row[@层]> ... 设置布局，例如 客厅:living:0:1 卧室:bedroom:0:0@1（层 -1|0|1，省略 = 自动）
   mijiabar house layout auto [--home H]              清掉布局覆盖，动态选择经典或 3×2 合成
-  mijiabar house layout classic [--home H]           保存经典四室几何，强制走整图
+  mijiabar house layout classic [--home H]           保存经典四室几何，平地模块合成并带门洞
   mijiabar house layout level <房间> <-1|0|1|auto>    错层：这个房间的地面抬高 / 下沉一级（每级 48px），auto = 自动图案
   mijiabar house layout flat | stagger [--home H]    整屋平铺（全部 0）/ 回到自动错层（后排两角高、前排右格低）
   mijiabar house reset [<设备> | --room <房间> | --layout] [--home H]   恢复自动
@@ -247,7 +247,7 @@ func parseVisible(_ s: String) throws -> Bool? {
         }
         let room = try await houseResolveRoom(pos[1], home: h.id)
         guard let cur = effective else {
-            throw MijiaError.unknownProperty(L("经典四室走整图，没有错层；先 house layout auto 或 set", "classic four uses the single cutaway (no levels); run house layout auto or set first"))
+            throw MijiaError.unknownProperty(L("经典四室使用带门洞的平地模块合成；调整错层前先 house layout auto 或 set", "classic four composes flat modules with doorways; run house layout auto or set before adjusting levels"))
         }
         guard let next = HouseLayoutSolver.setLevel(cur, room: room.key, level: lv) else {
             throw MijiaError.unknownProperty(L("房间不在小屋布局里：", "room is not in the house layout: ") + room.title)
@@ -256,7 +256,7 @@ func parseVisible(_ s: String) throws -> Bool? {
     case "flat", "stagger":
         try checkHouseWrite()
         guard let cur = effective else {
-            throw MijiaError.unknownProperty(L("经典四室走整图，没有错层；先 house layout auto 或 set", "classic four uses the single cutaway (no levels); run house layout auto or set first"))
+            throw MijiaError.unknownProperty(L("经典四室使用带门洞的平地模块合成；调整错层前先 house layout auto 或 set", "classic four composes flat modules with doorways; run house layout auto or set before adjusting levels"))
         }
         try HouseStore.update { $0.setLayout(home: h.id, layout: HouseLayoutSolver.setAllLevels(cur, flat: sub == "flat")) }
     default:
@@ -478,7 +478,7 @@ nonisolated(unsafe) let houseMCPTools: [[String: Any]] = [
      "inputSchema": ["type": "object", "properties": ["device": ["type": "string"], "visible": ["description": "true | false | \"auto\""], "place": ["type": "string"]], "required": ["device"]]],
     ["name": "set_house_room", "description": "设置米家房间在小屋里用哪个模块：living | bedroom | study | kitchen | bathroom | balcony | generic | none | auto。",
      "inputSchema": ["type": "object", "properties": ["room": ["type": "string"], "module": ["type": "string"], "home": ["type": "string"]], "required": ["room", "module"]]],
-    ["name": "get_house_layout", "description": "有效小屋格子布局；source=saved|auto|classic，classic=true 表示走经典整图。",
+    ["name": "get_house_layout", "description": "有效小屋格子布局；source=saved|auto|classic，classic=true 表示经典四室几何，使用带门洞的平地模块合成。",
      "inputSchema": ["type": "object", "properties": ["home": ["type": "string"]]]],
     ["name": "set_house_layout", "description": "设置格子布局。cells 为 [{room,module,col,row,level?}]，level = -1|0|1（错层，每级 48px；省略 = 自动图案）；传 null 或 mode=auto 清掉覆盖、动态自动布局；mode=classic 保存经典四室；mode=flat 全部平铺；mode=stagger 回到自动错层。",
      "inputSchema": ["type": "object", "properties": ["home": ["type": "string"], "mode": ["type": "string", "enum": ["classic", "auto", "flat", "stagger"]], "cells": ["type": ["array", "null"]]], "required": []]],

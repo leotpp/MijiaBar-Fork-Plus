@@ -315,11 +315,15 @@ import Testing
             var catalog = try Self.catalog()
             catalog.modules["generic"]!.variants = original.modules["generic"]!.variants
             let palette = HouseComposer.Palette(night: phase == "night")
-            for axis in [HouseDoorway.Axis.u, .v] {
-                for level in [-1, 0, 1] {
-                    let cells = Self.pair(axis: axis, level: level)
-                    let result = HouseComposer.compose(.init(layout: cells, catalog: catalog, images: images, night: phase == "night"))
-                    let doorway = try #require(HouseDoorwayPlanner.plan(layout: cells, catalog: catalog).first)
+            let pairs = [HouseDoorway.Axis.u, .v].flatMap { axis in
+                [-1, 0, 1].map { level in ("\(axis) level \(level)", Self.pair(axis: axis, level: level), catalog) }
+            }
+            let classics = [("classic-composer", HouseLayoutSolver.classicFour, original)]
+            for (name, cells, catalog) in pairs + classics {
+                let result = HouseComposer.compose(.init(layout: cells, catalog: catalog, images: images, night: phase == "night"))
+                let doorways = HouseDoorwayPlanner.plan(layout: cells, catalog: catalog)
+                #expect(doorways.count == (name.hasPrefix("classic") ? 4 : 1))
+                for doorway in doorways {
                     let low = Double(min(HouseLevels.elevation(doorway.back), HouseLevels.elevation(doorway.front)))
                     let high = Double(max(HouseLevels.elevation(doorway.back), HouseLevels.elevation(doorway.front)))
                     for image in [result.unlit, result.lit] {
@@ -339,7 +343,7 @@ import Testing
                                     if (0..<3).allSatisfy({ abs(Int(bytes[offset + $0]) - Int(expected[$0])) < 2 }) { count += 1 }
                                 }
                             }
-                            #expect(count >= 2, "\(phase) \(axis) level \(level): missing detail at \(along),\(across),\(elevation)")
+                            #expect(count >= 2, "\(phase) \(name) \(doorway.back.module)-\(doorway.front.module): missing detail at \(along),\(across),\(elevation)")
                         }
                         for along in [doorway.lower, doorway.upper] {
                             check(palette.jamb, along: along, elevation: high + 20)

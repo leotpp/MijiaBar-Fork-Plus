@@ -249,7 +249,7 @@ The current six-room demo composes at 848×568 pixels; exporting 1696×1136 woul
 
 1. **Saved layout wins.** A non-null `homes.<id>.layout` is used unchanged, including an empty layout or an explicit classic-four marker.
    With no saved layout, a kitchen, bathroom or balcony with at least one **online, visible, showable** device switches the home to automatic
-   composed modules. Otherwise the original classic cutaway and its room-selection rules are unchanged. Offline-only rooms do not trigger
+   composed modules. Otherwise classic four keeps its room-selection rules and renders flat modules with doorways. Offline-only rooms do not trigger
    the switch, even with `visible: true`; offline devices can still appear in an already selected room under the usual visibility rules.
 2. **Room → module** by name (Simplified/Traditional Chinese and English): 客厅/living → `living`; 卧/儿童房/客房/bedroom → `bedroom`;
    书房/办公/study/office → `study`; 玄关/门口/走廊/entry/hall → `generic`; 厨房/kitchen → `kitchen`;
@@ -428,7 +428,7 @@ Composed layouts are drawn with rooms at clearly different floor heights, like t
 
 - `level` absent → automatic pattern: back row `+1 0 +1`, front row `0 0 -1` (so the back corners are high and the front-right cell is low). `house layout stagger` clears all explicit levels back to this.
 - `house layout flat` sets every cell to 0. The House window → Room layout has a "Split levels" checkbox and ▼/▲ on each card. A "·" after the number means the level is automatic.
-- Classic four (effective layout nil, or classic geometry with no explicit non-zero level) stays the single hand-drawn cutaway for builtin/palette styles without pets. An explicit non-zero level on classic geometry switches it to the composed renderer.
+- Classic four (effective layout nil, or classic geometry with no explicit non-zero level) uses flat composed modules with doorways, including builtin/palette styles without pets. Explicit non-zero levels on classic-shaped cells preserve the existing composed split-level treatment and three-step stairs for eligible 48 px differences.
 - **Step faces:** one step (48 px) is taller than a cut wall (40 px), so a raised room's base shows above the cut wall of the lower room in front of it. The composer extends every room's base down to the lowest floor in the house and draws it as a stone plinth (`HouseComposer.plinth`). The plinth has 10 px courses of staggered 26 px blocks with a jittered tone per block, 1 px mortar, a shadow under the wooden slab and a ground line. The left-front (SW) face is lighter than the right-front (SE) face, and the night palette darkens it like the walls. Both lit and unlit renders draw the plinth identically, so light masks never reveal light on step faces. Two steps (96 px) stay below a full wall (104 px).
 - Shared and cut walls, end faces, the outline and the silhouette are computed from absolute heights. At the back corner the silhouette follows each wall's own height, so no outline-coloured triangle shows above a lower neighbour.
 - **Badges and floor spots:** a badge, floor `alt` spot or floor room label that would sit behind a front neighbour's cut wall (taller when that room is higher) moves along the floor into the room until it clears the wall top. Badges in a room are then kept ≥ 54 px apart. Ceiling and hidden-fixture spots move up to clear the badges, and a floor room label moves sideways (or above the badges) so it covers neither a badge nor a ceiling spot.
@@ -480,10 +480,13 @@ All current styles use these procedural doorways; no new PNGs are required for a
 may overlap existing furniture artwork; art cleanup is separate from the full-coverage contract. Pet navigation
 adds deterministic, shortest grid connectors from each opening to existing walkable floor at runtime, without
 changing the authored walkability assets.
-**Classic follow-up:** the hand-drawn four-room cutaway and `house-cutaway.json` are unchanged; add matching doors to
-new source art later via `scripts/gen-house-cutaway-art.py`, not by patching its generated PNGs or JSON here.
-Configured pets already force a composed module scene, including classic four-room layouts,
-so eligible doorways appear there now. Small-scale visual acceptance remains a manual check outside the sandbox.
+**Classic four:** builtin/palette styles without pets now use `HouseModuleAssets.composedScene` too, with flat
+classicFour cells and the same #59 wall clipping, jambs and sill. All four adjoining pairs have openings:
+bedroom–study, bedroom–living, living–generic and study–living. Flat classic has no stairs; configured pets
+and art styles retain their composed paths. The live classic view no longer depends on the hand-drawn
+`house-cutaway-*` PNGs or `house-cutaway.json` when module assets are available. Those assets remain for
+bake/reference/fixtures tooling through `HouseAssets` and as a missing-composed-assets fallback.
+Small-scale visual acceptance remains a manual check outside the sandbox.
 
 #### Issue #58 acceptance status (2026-10-27)
 
@@ -509,7 +512,8 @@ Narrow preferred widths are bedroom–living (0.2125 in composed/pets/classic), 
 and bathroom–kitchen (0.275 in pets). All other openings are 0.3 wide.
 Regression checks cover every placed doorway's walking access, the pets bedroom–study no-jump route,
 fixture-only nudging/forced overlap, and day/night lit/unlit compositing. No app or GUI/snapshot command was run.
-Actual 1× screenshot inspection remains unchecked. Classic hand-drawn cutaway art/JSON remains a follow-up, unchanged.
+Actual 1× screenshot inspection remains unchecked. The table above describes the auto-level `classic-composer`
+test fixture; live classic four is explicitly flat and now uses the same doorway composer, without stairs.
 
 Round 3 validation: native SwiftPM build succeeded; 248 of 249 tests passed, with only the known sandbox
 `storeMergesConflictCopies` Cocoa 512 write failure. All 15 doorway tests passed. Sequential and concurrent schedule
