@@ -39,6 +39,25 @@ final class AppModel: ObservableObject {
     let mock: Bool
     let controller = Controller(cloud: nil)
     private var loginTask: Task<Void, Never>?
+    private(set) var cloudIdentity = UUID()
+
+    func installCloud(_ value: Session) {
+        controller.cloud?.invalidate()
+        let id = UUID(); cloudIdentity = id
+        session = value
+        controller.cloud = XiaomiCloud(session: value) { [weak self] updated in
+            await self?.acceptSession(updated, identity: id)
+        }
+    }
+    func acceptSession(_ value: Session, identity: UUID) {
+        guard cloudIdentity == identity, controller.cloud != nil else { return }
+        session = value
+    }
+    func changeRegionSession(_ region: String, load: () -> Session? = Session.load, save: (Session) -> Void = { $0.save() }) {
+        controller.cloud?.invalidate()
+        guard var latest = load() else { return }
+        latest.region = region; save(latest); installCloud(latest)
+    }
     private var loading: Set<String> = []
     private var stylePackChanges: AnyCancellable?
 
@@ -52,7 +71,7 @@ final class AppModel: ObservableObject {
         stylePackChanges = HouseStylePackStore.shared.$revision.dropFirst().sink { [weak self] _ in self?.objectWillChange.send() }
         if mock { loadMock(); return }
         session = Session.load()
-        if let s = session { controller.cloud = XiaomiCloud(session: s) }
+        if let s = session { installCloud(s) }
         if let c = DeviceCache.load() { homes = c.homes; devices = c.devices }
         house = HouseStore.load()
         watchHouse()
@@ -376,7 +395,8 @@ final class AppModel: ObservableObject {
                 qrImage = NSImage(data: try await ql.image(t))
                 loginStatus = L("打开米家 App 扫一扫，并在手机上确认登录", "Scan with the Mi Home app and confirm")
                 let s = try await ql.wait(t, region: prefs.region)
-                s.save(); session = s; controller.cloud = XiaomiCloud(session: s)
+                controller.cloud?.invalidate()
+                s.save(); installCloud(s)
                 loggingIn = false; qrImage = nil; loginStatus = ""
                 await refresh()
             } catch {
@@ -398,9 +418,10 @@ final class AppModel: ObservableObject {
     func setRegion(_ r: String) {
         prefs.region = r
         if !langManual, let d = AppLang.suggested(forRegion: r).first { setLang(d, manual: false) }
-        if var s = session { s.region = r; s.save(); session = s; controller.cloud = XiaomiCloud(session: s); clearDeviceState(); Task { await refresh() } }
+        if session != nil { changeRegionSession(r); clearDeviceState(); Task { await refresh() } }
     }
     func logout() {
+        controller.cloud?.invalidate(); cloudIdentity = UUID()
         Session.clear(); DeviceCache.clear()
         session = nil; controller.cloud = nil; devices = []; homes = []; clearDeviceState(); page = .list
     }

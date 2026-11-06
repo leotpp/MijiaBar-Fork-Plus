@@ -22,18 +22,26 @@ public var xiaomiRegions: [(id: String, name: String)] { [
 
 /// 小米云 API（与米家 App 相同的 RC4 加密签名接口）
 public final class XiaomiCloud: Sendable {
-    public let session: Session
+    public var session: Session { get async throws { try await keeper.snapshot().session } }
+    private let keeper: SessionKeeper
+    public func invalidate() { keeper.invalidate() }
     private let agent: String
     private let http: URLSession
 
-    public init(session: Session) {
-        self.session = session
+    public convenience init(session: Session, onSessionChange: @escaping @Sendable (Session) async -> Void = { _ in }) {
+        self.init(session: session, http: nil, refresh: { try await AccountLogin().refresh($0) }, changed: onSessionChange)
+    }
+
+    init(session: Session, http suppliedHTTP: URLSession?, refresh: @escaping @Sendable (Session) async throws -> Session,
+         commit: @escaping @Sendable (Session) throws -> Session = { try Session.persistRefresh($0) },
+         clock: @escaping @Sendable () -> Date = { Date() }, changed: @escaping @Sendable (Session) async -> Void = { _ in }) {
+        keeper = SessionKeeper(session: session, refresh: refresh, commit: commit, clock: clock, changed: changed)
         let r1 = String((0..<18).map { _ in Character(UnicodeScalar(UInt8.random(in: 97...122))) })
         let r2 = String((0..<13).map { _ in Character(UnicodeScalar(UInt8.random(in: 65...69))) })
         agent = "\(r1)-\(r2) APP/com.xiaomi.mihome APPV/10.5.201"
         let c = URLSessionConfiguration.ephemeral
         c.httpShouldSetCookies = false; c.httpCookieAcceptPolicy = .never; c.timeoutIntervalForRequest = 15
-        http = URLSession(configuration: c)
+        http = suppliedHTTP ?? URLSession(configuration: c)
     }
 
     static func base(_ region: String) -> String { "https://" + (region == "cn" ? "" : region + ".") + "api.io.mi.com/app" }
@@ -50,6 +58,20 @@ public final class XiaomiCloud: Sendable {
     /// path 形如 "/v2/homeroom/gethome"
     public func call(_ path: String, _ data: Any) async throws -> Any {
         let dataStr = String(data: try JSONSerialization.data(withJSONObject: data), encoding: .utf8) ?? "{}"
+        let first = try await keeper.snapshot()
+        do { return try await attempt(path, dataStr, session: first.session) }
+        catch CloudError.authExpired {
+            let recovered = try await keeper.recover(rejectedGeneration: first.generation)
+            try Task.checkCancellation()
+            do { return try await attempt(path, dataStr, session: recovered.session) }
+            catch CloudError.authExpired {
+                await keeper.coolDown(generation: recovered.generation)
+                throw CloudError.authExpired
+            }
+        }
+    }
+
+    private func attempt(_ path: String, _ dataStr: String, session: Session) async throws -> Any {
         let nonce = MiCrypto.nonce()
         let sn = MiCrypto.signedNonce(ssecurity: session.ssecurity, nonce: nonce)
         guard let snKey = Data(base64Encoded: sn) else { throw CloudError.badResponse }
@@ -72,6 +94,8 @@ public final class XiaomiCloud: Sendable {
         let (body, resp) = try await http.data(for: req)
         let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
         if code == 401 || code == 403 { throw CloudError.authExpired }
+        if code == 426, let object = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+           object["message"] as? String == "SERVICETOKEN_EXPIRED" { throw CloudError.authExpired }
         guard code == 200 else { throw CloudError.http(code) }
         var obj: [String: Any]?
         let text = String(data: body, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
@@ -150,13 +174,11 @@ public final class XiaomiCloud: Sendable {
 public final class QRLogin {
     public struct Ticket: Sendable { public let qrURL: URL; public let loginURL: String; public let lpURL: URL; public let timeout: TimeInterval }
     private let http: URLSession
-    private let cookies: HTTPCookieStorage
+    private let login: AccountLogin
 
     public init() {
-        let c = URLSessionConfiguration.ephemeral
-        cookies = c.httpCookieStorage ?? HTTPCookieStorage.shared
-        c.timeoutIntervalForRequest = 30
-        http = URLSession(configuration: c)
+        login = AccountLogin()
+        http = login.http
     }
 
     static func strip(_ d: Data) throws -> [String: Any] {
@@ -191,14 +213,10 @@ public final class QRLogin {
             catch let e as URLError where e.code == .timedOut { continue }
             guard (r as? HTTPURLResponse)?.statusCode == 200 else { try await Task.sleep(nanoseconds: 1_000_000_000); continue }
             let o = try Self.strip(d)
-            guard let ssecurity = o["ssecurity"] as? String, let loc = (o["location"] as? String).flatMap(URL.init(string:)) else {
+            guard o["ssecurity"] is String, o["location"] is String else {
                 try await Task.sleep(nanoseconds: 1_000_000_000); continue
             }
-            let userId = anyString(o["userId"])
-            _ = try await http.data(from: loc)
-            guard let token = cookies.cookies?.first(where: { $0.name == "serviceToken" })?.value else { throw CloudError.noServiceToken }
-            let pass = (o["passToken"] as? String) ?? cookies.cookies?.first(where: { $0.name == "passToken" })?.value
-            return Session(userId: userId, ssecurity: ssecurity, serviceToken: token, region: region, cUserId: o["cUserId"] as? String, passToken: pass)
+            return try await login.finish(o, region: region)
         }
     }
 }

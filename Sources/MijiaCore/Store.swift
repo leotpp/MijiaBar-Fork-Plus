@@ -34,9 +34,15 @@ public enum Keychain {
         [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: account]
     }
     public static func set(_ data: Data, account: String) {
-        SecItemDelete(base(account) as CFDictionary)
-        var q = base(account); q[kSecValueData as String] = data
-        SecItemAdd(q as CFDictionary, nil)
+        try? setChecked(data, account: account)
+    }
+    static func setChecked(_ data: Data, account: String) throws {
+        var status = SecItemUpdate(base(account) as CFDictionary, [kSecValueData as String: data] as CFDictionary)
+        if status == errSecItemNotFound {
+            var q = base(account); q[kSecValueData as String] = data
+            status = SecItemAdd(q as CFDictionary, nil)
+        }
+        guard status == errSecSuccess else { throw CloudError.authExpired }
     }
     public static func get(account: String) -> Data? {
         var q = base(account); q[kSecReturnData as String] = true; q[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -53,7 +59,7 @@ public struct Session: Codable, Equatable, Sendable {
     public var serviceToken: String
     public var region: String
     public var cUserId: String?
-    /// 扫码登录返回的长期凭据，只用于给本机 go2rtc 直播助手换取摄像头 P2P 密钥（v0.1.8 起保存）
+    /// 扫码登录返回的长期凭据，用于续期及直播助手换取 P2P 密钥
     public var passToken: String?
     public init(userId: String, ssecurity: String, serviceToken: String, region: String, cUserId: String? = nil, passToken: String? = nil) {
         self.userId = userId; self.ssecurity = ssecurity; self.serviceToken = serviceToken; self.region = region; self.cUserId = cUserId
@@ -65,6 +71,12 @@ public struct Session: Codable, Equatable, Sendable {
         return try? JSONDecoder().decode(Session.self, from: d)
     }
     public func save() { if let d = try? JSONEncoder().encode(self) { Keychain.set(d, account: "session") } }
+    static func persistRefresh(_ replacement: Session, load: () -> Session? = Session.load,
+                               save: (Session) throws -> Void = { try Keychain.setChecked(JSONEncoder().encode($0), account: "session") }) throws -> Session {
+        if let current = load(), current.userId != replacement.userId || current.region != replacement.region { return current }
+        try save(replacement)
+        return replacement
+    }
     public static func clear() { Keychain.delete(account: "session") }
 }
 
